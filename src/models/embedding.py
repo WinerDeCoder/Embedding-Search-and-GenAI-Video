@@ -6,7 +6,10 @@ load_dotenv("../../.env")
 
 #chroma-openai embedding define
 
-openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-                api_key=os.getenv("OPENAI_API_KEY"),
-                model_name=os.getenv("EMBEDDING_MODEL")
-            )
+def define_embedding_function(api_key, model_name):
+    openai_ef = embedding_functions.OpenAIEmbeddingFunction(
+                    api_key=api_key,
+                    model_name=model_name
+                )
+    
+    return openai_ef
