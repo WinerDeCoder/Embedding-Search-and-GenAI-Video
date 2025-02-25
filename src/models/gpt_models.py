@@ -67,24 +67,54 @@ def generate_variant_question(input_text: str):
             - Bạn có thể dùng những từ đồng nghĩa
             - Bạn có thể dùng thêm những từ địa phương ở Việt Nam
             - Bạn có thể thêm bớt 1 số từ trong câu hỏi gốc mà không làm thay đổi ý nghĩa câu
-        ***Đặc biệt, câu hỏi biến thể có thể***:
+            
+        Lưu ý khi generate:
+            - Câu hỏi biến thể bắt buộc phải tuyệt đối tương đồng ý nghĩa, cùng cách hỏi, 
+            - Trong tất cả câu hỏi biến thể, không có câu nào giống nhau trên 90%, hãy cố gắng để nó đa dạng
+        Bạn hãy chỉ output ra đúng 1 python list chứa {number_question} phần tử là các câu hỏi đồng nghĩa.
+    """
+        
+    completion = client.beta.chat.completions.parse(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "developer", "content": f"{prompt}"},
+            {
+                "role": "user",
+                "content": f"{input_text}"
+            }
+        ],
+        response_format = Question_List
+    )
+    
+    output_list = completion.choices[0].message
+    
+    if (output_list.refusal):
+        return ["-1"]
+    else:
+        return output_list.parsed
+    
+
+    
+def wrong_word_modify(input_text: str):
+    
+    prompt = \
+    f"""
+        Bạn là một chuyên gia về việc cố ý viết sai những câu viết đúng. Bạn sẽ nhận đầu vào là 1 python list chứa 5 câu hỏi bằng tiếng Việt
+        Tất nhiên cả 5 câu này đều đúng chính tả. Nhiệm vụ của bạn là điều chỉnh cả 5 câu này thành đều sai chính tả với luật sau:
+        
+        Sai chính tả phải gồm:
             - Sai chính tả  1 số từ tiếng việt, ví dụ người dùng muốn nhập "bón" nhưng vì viết nhanh nên thừa dấu thành "bons" hoặc thiếu dấu "bon".
             - Không có dấu "?"
             - Không có dấu tiếng việt ở một số từ hoặc toàn bộ
             
         Lưu ý khi generate:
-            - Câu hỏi biến thể bắt buộc phải tuyệt đối tương đồng ý nghĩa, cùng cách hỏi, 
-            - ***Đặc biệt phải có***: 
-                + Với những trường hợp đặc biệt cho câu hỏi biến thể như trên ( sai chính tả, không dấu,....), hãy cho phép 50% trên tổng số câu vào trường hợp này, còn 50% sẽ luôn đúng toàn bộ ngữ pháp
-                + ***Ở các câu đặc biệt, bắt buộc phải có ít nhất 1 từ sai chính tả như đã define***
-                + Để cố ý viết sai chính tả, hay random một số từ để viết dấu tiếng việt cần unikey nhưng cố ý không set. Ví dụ "bón" thành "bon".
-            - Assume sao cho nếu dùng phương pháp embedding vector và so sánh cosine thì vector câu hỏi biến thể và câu hỏi gốc phải đạt ít nhất 0.7 ( cosine range từ -1 tới 1)
-            - Trong tất cả câu hỏi biến thể, không có câu nào giống nhau trên 90%
-        Bạn hãy chỉ output ra đúng 1 python list chứa {number_question} phần tử là các câu hỏi đồng nghĩa.
+            - Bạn chỉ được modify ở scope mỗi từ, không được phép thay đổi cấu trúc câu
+            - Mỗi câu sai chính tả đều phải bao gồm cả 3 yếu tố
+        Bạn hãy chỉ output ra đúng 1 python list chứa 5 phần tử là các câu hỏi đã được điều chỉnh để sai chính tả.
     """
         
     completion = client.beta.chat.completions.parse(
-        model="gpt-4o",
+        model="gpt-4o-mini",
         messages=[
             {"role": "developer", "content": f"{prompt}"},
             {
