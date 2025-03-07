@@ -1,0 +1,12 @@
+
+services:
+  back_end:
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name:  HeyGen_API_test
+    ports:
+      - "8006:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
