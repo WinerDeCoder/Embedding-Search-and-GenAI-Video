@@ -81,6 +81,7 @@ class QARequest(BaseModel):
     answer: str
 
 class VideoResponse(BaseModel):
+    status: str
     video_url: str
     
     
@@ -154,4 +155,4 @@ def generate_video(request: QARequest):
     video_id, video_status, video_url = video_generator(no, answer)
     
 
-    return VideoResponse(video_url=video_url)
+    return VideoResponse(status = video_status, video_url=video_url)
