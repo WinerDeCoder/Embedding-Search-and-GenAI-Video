@@ -100,7 +100,7 @@ def video_generator(title, script):
 
     video_id = response.json()["data"]["video_id"]
     print("video_id:", video_id)
-    
+    start_time = time.time()  # Track the start time
     
     # Check Video Generation Status
     video_status_url = f"https://api.heygen.com/v1/video_status.get?video_id={video_id}"
@@ -110,7 +110,7 @@ def video_generator(title, script):
 
         if status == "completed":
             video_url = response.json()["data"]["video_url"]
-            thumbnail_url = response.json()["data"]["thumbnail_url"]
+            #thumbnail_url = response.json()["data"]["thumbnail_url"]
             # print(
             #     f"Video generation completed! \nVideo URL: {video_url} \nThumbnail URL: {thumbnail_url}"
             # )
@@ -126,6 +126,12 @@ def video_generator(title, script):
         elif status == "processing" or status == "pending":
             print("Video is still processing. Checking status...")
             time.sleep(10)  # Sleep for 5 seconds before checking again
+            
+            # Check if more than 20 minutes have passed
+            if time.time() - start_time > 1200:
+                print("Timeout: Video generation took too long.")
+                return title, "timeout", ""
+            
         elif status == "failed":
             error = response.json()["data"]["error"]
             print(f"Video generation failed. '{error}'")
@@ -147,8 +153,5 @@ def generate_video(request: QARequest):
     
     video_id, video_status, video_url = video_generator(no, answer)
     
-    
-    
-    
-    
+
     return VideoResponse(video_url=video_url)
