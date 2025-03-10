@@ -82,6 +82,7 @@ class QARequest(BaseModel):
 
 class VideoResponse(BaseModel):
     status: str
+    message: str
     video_url: str
     
     
@@ -95,8 +96,9 @@ def video_generator(title, script):
     if not response.json()["data"]:
         print(response)
         print(response.json()["error"])
+        message = "Response Failed"
         
-        return title, "error", ""
+        return "", "error", message, ""
         
 
     video_id = response.json()["data"]["video_id"]
@@ -111,6 +113,8 @@ def video_generator(title, script):
 
         if status == "completed":
             video_url = response.json()["data"]["video_url"]
+            
+            message = 'Success'
             #thumbnail_url = response.json()["data"]["thumbnail_url"]
             # print(
             #     f"Video generation completed! \nVideo URL: {video_url} \nThumbnail URL: {thumbnail_url}"
@@ -122,7 +126,7 @@ def video_generator(title, script):
             #     video_content = requests.get(video_url).content
             #     video_file.write(video_content)
                 
-            return title, status, video_url
+            return video_id, status, message, video_url
 
         elif status == "processing" or status == "pending":
             print("Video is still processing. Checking status...")
@@ -131,13 +135,15 @@ def video_generator(title, script):
             # Check if more than 20 minutes have passed
             if time.time() - start_time > 1200:
                 print("Timeout: Video generation took too long.")
-                return title, "timeout", ""
+                message = 'Timeout Exceeded'
+                return video_id, "timeout", message, ""
             
         elif status == "failed":
             error = response.json()["data"]["error"]
             print(f"Video generation failed. '{error}'")
+            message = error
             
-            return title, status, ""
+            return video_id, status, message, ""
     
     
 @app.get("/")
@@ -152,7 +158,7 @@ def generate_video(request: QARequest):
     question = request.question
     answer = request.answer
     
-    video_id, video_status, video_url = video_generator(no, answer)
+    video_id, video_status, message, video_url = video_generator(no, answer)
     
 
-    return VideoResponse(status = video_status, video_url=video_url)
+    return VideoResponse(status = video_status, message = message, video_url=video_url)
