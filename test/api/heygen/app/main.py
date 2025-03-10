@@ -154,11 +154,14 @@ async def root():
 @app.post("/generate_video", response_model=VideoResponse)
 def generate_video(request: QARequest):
     # Process function logic goes here
-    no = request.no 
-    question = request.question
-    answer = request.answer
-    
-    video_id, video_status, message, video_url = video_generator(no, answer)
-    
+    try:
+        no = request.no 
+        question = request.question
+        answer = request.answer
+        
+        video_id, video_status, message, video_url = video_generator(no, answer)
+        
 
-    return VideoResponse(status = video_status, message = message, video_url=video_url)
+        return VideoResponse(status = video_status, message = message, video_url=video_url)
+    except Exception as e: 
+        return VideoResponse(status = "error", message = "Backend Error", video_url="")
