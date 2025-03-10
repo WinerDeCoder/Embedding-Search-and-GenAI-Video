@@ -4,7 +4,7 @@ from openai import OpenAI
 from pydantic import BaseModel, Field
 
 from dotenv import load_dotenv
-load_dotenv("../../.env")
+load_dotenv("../../../.env")
 
 # OpenAI API setup
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -14,6 +14,72 @@ number_question = os.getenv("NUMBER_QUESTION")
 openai.api_key = OPENAI_API_KEY
 
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+
+def correct_text_or_audio(input_text: str, input_audio: str) -> str:
+    """
+    Corrects or enhances the input text from a user, handling both text and audio input.
+    Uses OpenAI's GPT-4o mini Audio model to process and correct the input.
+    
+    :param input_text: Optional string input (user-typed text)
+    :param input_audio: Optional audio input (bytes format, user-recorded speech)
+    :return: Corrected text
+    """
+    prompt = \
+    f"""
+    Bạn là một chuyên gia tiếng Việt. Nhiệm vụ của bạn là phát hiện bất thường và chỉnh sửa câu hỏi đầu vào sao cho:
+    - Câu sau khi chỉnh sửa đúng ngữ pháp chính tả tiếng việt có dấu
+    - Số lượng từ trong câu phải giữ nguyên, không được thêm hoặc bớt.
+    - Không thêm bất kỳ từ hay ký tự nào khác ngoài việc chỉnh sửa trong từ.
+
+    Ghi chú: Chỉ trả lời câu hỏi đã chỉnh sửa mà không giải thích gì thêm. Luôn luôn trả lời dưới dạng text
+    Ví dụ: 
+        Nếu input là "Taij sao càn phải bón phaan howjpj lí cho cây ?", 
+        bạn sẽ chỉ output "Tại sao cần phải bón phân cho cây ?"
+    """
+    
+    try:
+        messages = [{"role": "system", "content": prompt}]
+        
+        if input_text != "":
+            messages.append({"role": "user", "content": [
+                { 
+                    "type": "text",
+                    "text": input_text
+
+                }
+            ]})
+        elif input_audio != "7":
+            messages.append({"role": "user", "content": [
+                {
+                    "type": "input_audio",
+                    "input_audio": {
+                        "data": input_audio,
+                        "format": "wav"
+                    }
+                }
+            ]})
+        else:
+            raise ValueError("Either text or audio input must be provided.")
+        
+        print(messages)
+        
+        completion = client.chat.completions.create(
+            model="gpt-4o-mini-audio-preview-2024-12-17",  # Multi-modal model supporting text and audio
+            modalities=["text", "audio"],
+            audio={"voice": "alloy", "format": "wav"},
+            messages=messages
+        )
+        
+        print(completion.choices[0])
+        corrected_text = completion.choices[0].message
+        return corrected_text
+    
+    except Exception as e:
+        print(f"Error: {e}")
+        return input_text if input_text else "Lỗi xử lý âm thanh."
+    
+
 
 # Function to correct or enhance the input text using GPT
 def correct_text_with_gpt(input_text: str) -> str:
