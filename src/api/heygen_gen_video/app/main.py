@@ -22,47 +22,47 @@ app.add_middleware(
 #Payload
 def payload_setting(title, script):
     
-    # payload = {
-    #     "test": True,
-    #     "caption": False,
-    #     "title": title,
-    #     "dimension": {
-    #             "width": 1920,  # Fix
-    #             "height": 1080  # fix
-    #         },
-    #     "variables": {
-    #         "script": {
-    #             "name": "script",
-    #             "type": "text",
-    #             "properties": {"content": script},
-    #         }
-    #     },
-    # }
-    
     payload = {
-            "caption": False,  # Caption, maybe the subtile
-            "title": title,  # Need to change , match the index of video
-            "callback_id": "string",
-            "dimension": {
-                "width": 1024,  # Fix
-                "height": 720  # fix
+        "test": True,
+        "caption": False,
+        "title": title,
+        "dimension": {
+                "width": 1920,  # Fix
+                "height": 1080  # fix
             },
-            "video_inputs": [      # up to 50, don't know whether it is video setting or many video at a time
-                {
-                    "character": {
-                        "type": "avatar",
-                        "avatar_id": "Angela-inTshirt-20220820",
-                        "avatar_style": "normal"
-                    },
-                    "voice": {
-                        "type": "text",
-                        "voice_id": "c6fb81520dcd42e0a02be231046a8639", #str
-                        "input_text": script #str
-                    },   # voice id Fixx
-                }
-            ],
-            "callback_url": "string"
-        }
+        "variables": {
+            "script": {
+                "name": "script",
+                "type": "text",
+                "properties": {"content": script},
+            }
+        },
+    }
+    
+    # payload = {
+    #         "caption": False,  # Caption, maybe the subtile
+    #         "title": title,  # Need to change , match the index of video
+    #         "callback_id": "string",
+    #         "dimension": {
+    #             "width": 1024,  # Fix
+    #             "height": 720  # fix
+    #         },
+    #         "video_inputs": [      # up to 50, don't know whether it is video setting or many video at a time
+    #             {
+    #                 "character": {
+    #                     "type": "avatar",
+    #                     "avatar_id": "Angela-inTshirt-20220820",
+    #                     "avatar_style": "normal"
+    #                 },
+    #                 "voice": {
+    #                     "type": "text",
+    #                     "voice_id": "c6fb81520dcd42e0a02be231046a8639", #str
+    #                     "input_text": script #str
+    #                 },   # voice id Fixx
+    #             }
+    #         ],
+    #         "callback_url": "string"
+    #     }
     
     return payload
 
@@ -72,8 +72,8 @@ heygen_api_key  = os.getenv("HEYGEN_API_KEY")
 headers         = {"Accept": "application/json", "X-API-KEY": heygen_api_key}
 template_id     = os.getenv("TEMPLATE_ID")
 
-#generate_url    = f"https://api.heygen.com/v2/template/{template_id}/generate"
-generate_url    = "https://api.heygen.com/v2/video/generate"
+generate_url    = f"https://api.heygen.com/v2/template/{template_id}/generate"
+#generate_url    = "https://api.heygen.com/v2/video/generate"
 
 class QARequest(BaseModel):
     no: str

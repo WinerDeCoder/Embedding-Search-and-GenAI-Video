@@ -24,12 +24,12 @@ def transcribe_audio(audio_bytes: bytes) -> str:
     audio_file = io.BytesIO(audio_bytes)
     audio_file.name = "audio.mp3"  # Whisper requires a filename
 
-    transcription = openai.Audio.transcribe(
+    transcription = client.audio.transcriptions.create(
         model="whisper-1",
         file=audio_file
     )
 
-    return transcription["text"]
+    return transcription.text
 
 
 
@@ -70,6 +70,7 @@ def correct_text_or_audio(input_text: str, input_audio: str) -> str:
                     "role": "user",
                     "content": transcription_text
                 })
+            
         else:
             
             messages.append({
@@ -79,7 +80,7 @@ def correct_text_or_audio(input_text: str, input_audio: str) -> str:
             
             #raise ValueError("Either text or audio input must be provided.")
         
-        print(messages)
+        #print(messages)
         
         completion = client.chat.completions.create(
             model="gpt-4o-mini",
