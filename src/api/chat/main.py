@@ -41,7 +41,7 @@ class QuestionResponse(BaseModel):
     answer: str
     
 class Add_Question(BaseModel):
-    id: str
+    no: str
     question: str
     
 
@@ -97,19 +97,19 @@ async def add_question(query: Add_Question):
         await asyncio.to_thread(
             chromadb_collection.add,
             documents=[query.question],
-            metadatas=[{"id": query.id}],
-            ids=[query.id]
+            metadatas=[{"id": query.no}],
+            ids=[query.no]
         )
 
         return JSONResponse(
-            content={"status": "success", "message": "Question added successfully", "question_id": query.id},
+            content={"status": "success", "message": "Question added successfully", "question_id": query.no},
             status_code=200
         )
 
     except Exception as e:
         print(f"Error adding question: {e}")
         return JSONResponse(
-            content={"status": "failed", "message": str(e), "question_id": query.id},
+            content={"status": "failed", "message": str(e), "question_id": query.no},
             status_code=500
         )
     
