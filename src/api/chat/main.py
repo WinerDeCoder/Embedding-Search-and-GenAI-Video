@@ -1,15 +1,11 @@
 import sys
 import os
-
-import sys
-import os
-
-    
     
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -44,6 +40,10 @@ class QuestionResponse(BaseModel):
     question_id: str
     answer: str
     
+class Add_Question(BaseModel):
+    id: str
+    question: str
+    
 
 # Add CORS middleware
 app.add_middleware(
@@ -67,6 +67,7 @@ async def query_chromadb(corrected_text):
         n_results=1
     ))
 
+
 @app.post("/api/video-search")
 async def video_search(query: SearchQuery):
     if not query.text and not query.audio:
@@ -87,4 +88,30 @@ async def video_search(query: SearchQuery):
     except Exception as e:
         print(f"Error: {e}")
         return QuestionResponse(question_id = "-1", answer = ask_again)
+    
+
+@app.post("/api/add-question")
+async def add_question(query: Add_Question):
+    try:
+        # Add data to ChromaDB asynchronously
+        await asyncio.to_thread(
+            chromadb_collection.add,
+            documents=[query.question],
+            metadatas=[{"id": query.id}],
+            ids=[query.id]
+        )
+
+        return JSONResponse(
+            content={"status": "success", "message": "Question added successfully", "question_id": query.id},
+            status_code=200
+        )
+
+    except Exception as e:
+        print(f"Error adding question: {e}")
+        return JSONResponse(
+            content={"status": "failed", "message": str(e), "question_id": query.id},
+            status_code=500
+        )
+    
+
 
