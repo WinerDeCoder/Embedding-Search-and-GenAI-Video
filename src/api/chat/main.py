@@ -1,13 +1,14 @@
-import sys
 import os
-    
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+
+from pydantic import BaseModel
+from typing import List
+
 from dotenv import load_dotenv
 
 from models.chromadb_functions import * 
@@ -30,20 +31,7 @@ app = FastAPI()
 
 # Thread pool executor for blocking operations
 executor = ThreadPoolExecutor(max_workers=10)
-
-# Define input model
-class SearchQuery(BaseModel):
-    text: str
-    audio: str
-    
-class QuestionResponse(BaseModel):
-    question_id: str
-    answer: str
-    
-class Add_Question(BaseModel):
-    no: str
-    question: str
-    
+ 
 
 # Add CORS middleware
 app.add_middleware(
@@ -58,6 +46,16 @@ app.add_middleware(
 async def root():
     return {"message": "Chat API is ready!"}
 
+
+#Endpoint to chat
+# Define input model
+class SearchQuery(BaseModel):
+    text: str
+    audio: str
+    
+class QuestionResponse(BaseModel):
+    question_id: str
+    answer: str
 
 # Function to run blocking ChromaDB query in thread pool
 async def query_chromadb(corrected_text):
@@ -90,15 +88,21 @@ async def video_search(query: SearchQuery):
         return QuestionResponse(question_id = "-1", answer = ask_again)
     
 
+
+#Endpoint to add question to database
+class Add_Question(BaseModel):
+    no: List[str]
+    question: List[str]
+
 @app.post("/api/add-question")
 async def add_question(query: Add_Question):
     try:
         # Add data to ChromaDB asynchronously
         await asyncio.to_thread(
             chromadb_collection.add,
-            documents=[query.question],
-            metadatas=[{"id": query.no}],
-            ids=[query.no]
+            documents=query.question,
+            metadatas=[{"id": f"{i}"} for i in query.no],
+            ids=query.no
         )
 
         return JSONResponse(
@@ -112,6 +116,127 @@ async def add_question(query: Add_Question):
             content={"status": "failed", "message": str(e), "question_id": query.no},
             status_code=500
         )
+        
+        
+#EndPoint to retrieve all data
+@app.get("/api/get-all-data")
+def get_all_data():
+    try:
+        # Get all data from ChromaDB
+        data = chromadb_collection.get()
+
+        # Filter only required fields
+        filtered_data = {
+            "ids": data.get("ids", []),
+            "documents": data.get("documents", []),
+            "metadatas": data.get("metadatas", [])
+        }
+
+        return JSONResponse(content={"status": "success", "data": filtered_data}, status_code=200)
+
+    except Exception as e:
+        return JSONResponse(content={"status": "failed", "message": str(e)}, status_code=500)
     
+
+  
+# Request model for updating documents
+class UpdateRequest(BaseModel):
+    ids: List[str]
+    documents: List[str]
+
+@app.put("/api/update-data")
+def update_data(request: UpdateRequest):
+    try:
+        # Ensure ids and documents have the same length
+        if len(request.ids) != len(request.documents):
+            return JSONResponse(
+                content={"status": "failed", "message": "Mismatch between IDs and documents count"},
+                status_code=400
+            )
+
+        # Perform update in ChromaDB
+        chromadb_collection.update(
+            ids=request.ids,
+            documents=request.documents
+        )
+
+        return JSONResponse(content={"status": "success", "message": "Data updated successfully"}, status_code=200)
+
+    except Exception as e:
+        return JSONResponse(content={"status": "failed", "message": str(e)}, status_code=500)
+    
+    
+    
+
+
+#EndPoint to delete all data
+# Define request body model
+class DeleteRequest(BaseModel):
+    confirm: str  # Must be "yes" to proceed
+
+@app.delete("/api/delete-all")
+def delete_all_questions(request: DeleteRequest):
+    try:
+        # Ensure confirmation is correct
+        if request.confirm.lower() != "yes":
+            return JSONResponse(
+                content={"status": "failed", "message": "Deletion not confirmed"},
+                status_code=400
+            )
+
+        # Get all stored IDs
+        all_ids = chromadb_collection.get()["ids"]
+        
+        if not all_ids:
+            return JSONResponse(
+                content={"status": "success", "message": "No data to delete"},
+                status_code=200
+            )
+        
+        # Delete all records
+        chromadb_collection.delete(ids=all_ids)
+
+        return JSONResponse(
+            content={"status": "success", "message": "All records deleted"},
+            status_code=200
+        )
+    
+    except Exception as e:
+        print(f"Error deleting records: {e}")
+        return JSONResponse(
+            content={"status": "failed", "message": str(e)},
+            status_code=500
+        )
+
+
+#Endpoint to delete ids
+# Define request body model
+class DeleteIDsRequest(BaseModel):
+    ids: List[str]  # List of IDs to delete
+
+@app.delete("/api/delete-ids")
+def delete_by_ids(request: DeleteIDsRequest):
+    try:
+        # Ensure the provided list is not empty
+        if not request.ids:
+            return JSONResponse(
+                content={"status": "failed", "message": "No IDs provided"},
+                status_code=400
+            )
+
+        # Delete the requested IDs from ChromaDB
+        chromadb_collection.delete(ids=request.ids)
+
+        return JSONResponse(
+            content={"status": "success", "message": f"Deleted {len(request.ids)} items", "deleted_ids": request.ids},
+            status_code=200
+        )
+
+    except Exception as e:
+        print(f"Error deleting IDs: {e}")
+        return JSONResponse(
+            content={"status": "failed", "message": str(e)},
+            status_code=500
+        )
 
 
