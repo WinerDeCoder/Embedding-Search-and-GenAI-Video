@@ -1,0 +1,12 @@
+
+services:
+  back_end:
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name:  Chat_Similar
+    ports:
+      - "8009:8000"
+    environment:
+      - PYTHONUNBUFFERED=1

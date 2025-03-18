@@ -4,9 +4,6 @@ import os
 import sys
 import os
 
-parent_path = os.path.abspath("../../..")  # Get absolute path of parent directory
-if parent_path not in sys.path:  
-    sys.path.append(parent_path)  # Add only if it's not already there
     
     
 import asyncio
@@ -17,14 +14,14 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from src.models.chromadb_functions import * 
-from src.models.gpt_models import correct_text_or_audio
+from models.chromadb_functions import * 
+from models.gpt_models import correct_text_or_audio
 
 # Load environment variables
 load_dotenv(".env")
 
 # ChromaDB Configuration
-collection_path = "../../../data/vector_database"
+collection_path = "vector_database"
 collection_name = os.getenv("CHROMADB_COLLECTION_NAME")
 embedding_func = define_embedding_function(api_key=os.getenv("OPENAI_API_KEY"), model_name=os.getenv("EMBEDDING_MODEL"))
 similarity_method = os.getenv("SIMILARITY_METHOD")
