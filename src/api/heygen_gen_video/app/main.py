@@ -76,7 +76,7 @@ generate_url    = f"https://api.heygen.com/v2/template/{template_id}/generate"
 #generate_url    = "https://api.heygen.com/v2/video/generate"
 
 class QARequest(BaseModel):
-    no: str
+    uuid: str
     question: str
     answer: str
 
@@ -129,7 +129,7 @@ def video_generator(title, script):
             return video_id, status, message, video_url
 
         elif status == "processing" or status == "pending":
-            print("Video is still processing. Checking status...")
+            #print("Video is still processing. Checking status...")
             time.sleep(10)  # Sleep for 5 seconds before checking again
             
             # Check if more than 20 minutes have passed
@@ -155,7 +155,7 @@ async def root():
 def generate_video(request: QARequest):
     # Process function logic goes here
     try:
-        no = request.no 
+        no = request.uuid 
         question = request.question
         answer = request.answer
         
