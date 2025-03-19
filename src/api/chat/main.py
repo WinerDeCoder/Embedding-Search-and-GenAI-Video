@@ -129,7 +129,7 @@ def get_all_data():
         # Filter only required fields
         filtered_data = {
             "documents": data.get("documents", []),
-            "uuids": data.get("metadatas", [])
+            "uuids": [item['uuid'] for item in data["metadatas"]]
         }
 
         return JSONResponse(content={"status": "success", "data": filtered_data}, status_code=200)

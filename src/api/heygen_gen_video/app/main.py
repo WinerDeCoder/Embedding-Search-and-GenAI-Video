@@ -1,7 +1,9 @@
 import os
+import json
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import time
 import requests
 from dotenv import load_dotenv
@@ -39,31 +41,6 @@ def payload_setting(title, script):
         },
     }
     
-    # payload = {
-    #         "caption": False,  # Caption, maybe the subtile
-    #         "title": title,  # Need to change , match the index of video
-    #         "callback_id": "string",
-    #         "dimension": {
-    #             "width": 1024,  # Fix
-    #             "height": 720  # fix
-    #         },
-    #         "video_inputs": [      # up to 50, don't know whether it is video setting or many video at a time
-    #             {
-    #                 "character": {
-    #                     "type": "avatar",
-    #                     "avatar_id": "Angela-inTshirt-20220820",
-    #                     "avatar_style": "normal"
-    #                 },
-    #                 "voice": {
-    #                     "type": "text",
-    #                     "voice_id": "c6fb81520dcd42e0a02be231046a8639", #str
-    #                     "input_text": script #str
-    #                 },   # voice id Fixx
-    #             }
-    #         ],
-    #         "callback_url": "string"
-    #     }
-    
     return payload
 
 
@@ -73,7 +50,6 @@ headers         = {"Accept": "application/json", "X-API-KEY": heygen_api_key}
 template_id     = os.getenv("TEMPLATE_ID")
 
 generate_url    = f"https://api.heygen.com/v2/template/{template_id}/generate"
-#generate_url    = "https://api.heygen.com/v2/video/generate"
 
 class QARequest(BaseModel):
     uuid: str
@@ -94,11 +70,8 @@ def video_generator(title, script):
     headers["Content-Type"] = "application/json"
     response = requests.post(generate_url, headers=headers, json=payload)
     if not response.json()["data"]:
-        print(response)
-        print(response.json()["error"])
-        message = "Response Failed"
         
-        return "", "error", message, ""
+        return "", "error", str(json.dumps(response.json())), ""
         
 
     video_id = response.json()["data"]["video_id"]
@@ -114,17 +87,7 @@ def video_generator(title, script):
         if status == "completed":
             video_url = response.json()["data"]["video_url"]
             
-            message = 'Success'
-            #thumbnail_url = response.json()["data"]["thumbnail_url"]
-            # print(
-            #     f"Video generation completed! \nVideo URL: {video_url} \nThumbnail URL: {thumbnail_url}"
-            # )
-
-            # Save the video to a file
-            # video_filename = f"../../data/videos/{title}.mp4"
-            # with open(video_filename, "wb") as video_file:
-            #     video_content = requests.get(video_url).content
-            #     video_file.write(video_content)
+            message = 'Video Generated Successfully'
                 
             return video_id, status, message, video_url
 
@@ -164,4 +127,4 @@ def generate_video(request: QARequest):
 
         return VideoResponse(status = video_status, message = message, video_url=video_url)
     except Exception as e: 
-        return VideoResponse(status = "error", message = "Backend Error", video_url="")
+        return VideoResponse(status = "error", message = f"Error: {e}", video_url="")
