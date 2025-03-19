@@ -1,1 +1,6 @@
+__pycache__/
 .env
+*.ipynb
+test/
+notebooks/
+.xlsx

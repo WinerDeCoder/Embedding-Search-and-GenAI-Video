@@ -1,5 +1,6 @@
 import os
 import asyncio
+import uuid
 from concurrent.futures import ThreadPoolExecutor
 
 from fastapi import FastAPI, HTTPException
@@ -81,7 +82,7 @@ async def video_search(query: SearchQuery):
         if results["distances"][0][0] > 0.6:
             return QuestionResponse(question_id = "-1", answer = ask_again)
         else:
-            return QuestionResponse(question_id = results["ids"][0][0], answer = results["documents"][0][0])
+            return QuestionResponse(question_id = results["metadatas"][0][0]["uuid"], answer = results["documents"][0][0])
 
     except Exception as e:
         print(f"Error: {e}")
@@ -91,8 +92,8 @@ async def video_search(query: SearchQuery):
 
 #Endpoint to add question to database
 class Add_Question(BaseModel):
-    no: List[str]
-    question: List[str]
+    uuid: str
+    question: str
 
 @app.post("/api/add-question")
 async def add_question(query: Add_Question):
@@ -100,24 +101,24 @@ async def add_question(query: Add_Question):
         # Add data to ChromaDB asynchronously
         await asyncio.to_thread(
             chromadb_collection.add,
-            documents=query.question,
-            metadatas=[{"id": f"{i}"} for i in query.no],
-            ids=query.no
+            documents=[query.question],
+            metadatas=[{"uuid": query.uuid}],
+            ids=[str(uuid.uuid4())]
         )
 
         return JSONResponse(
-            content={"status": "success", "message": "Question added successfully", "question_id": query.no},
+            content={"status": "success", "message": "Question added successfully", "uuid": query.uuid},
             status_code=200
         )
 
     except Exception as e:
         print(f"Error adding question: {e}")
         return JSONResponse(
-            content={"status": "failed", "message": str(e), "question_id": query.no},
+            content={"status": "failed", "message": str(e), "uuid": query.uuid},
             status_code=500
         )
         
-        
+
 #EndPoint to retrieve all data
 @app.get("/api/get-all-data")
 def get_all_data():
@@ -127,9 +128,8 @@ def get_all_data():
 
         # Filter only required fields
         filtered_data = {
-            "ids": data.get("ids", []),
             "documents": data.get("documents", []),
-            "metadatas": data.get("metadatas", [])
+            "uuids": data.get("metadatas", [])
         }
 
         return JSONResponse(content={"status": "success", "data": filtered_data}, status_code=200)
@@ -141,29 +141,29 @@ def get_all_data():
   
 # Request model for updating documents
 class UpdateRequest(BaseModel):
-    ids: List[str]
-    documents: List[str]
+    uuid: str
+    question: str
 
 @app.put("/api/update-data")
 def update_data(request: UpdateRequest):
     try:
-        # Ensure ids and documents have the same length
-        if len(request.ids) != len(request.documents):
-            return JSONResponse(
-                content={"status": "failed", "message": "Mismatch between IDs and documents count"},
-                status_code=400
-            )
-
+        
+        question_id = chromadb_collection.get(where={"uuid": request.uuid})
+        
+        if len(question_id['ids']) ==0:
+            return JSONResponse(content={"status": "Invalid", "message": "UUID not found", "uuid": request.uuid}, status_code=404)
+        
+        
         # Perform update in ChromaDB
         chromadb_collection.update(
-            ids=request.ids,
-            documents=request.documents
+            ids=[question_id['ids'][0]],
+            documents=[request.question]
         )
 
-        return JSONResponse(content={"status": "success", "message": "Data updated successfully"}, status_code=200)
+        return JSONResponse(content={"status": "success", "message": "Data updated successfully", "uuid": request.uuid}, status_code=200)
 
     except Exception as e:
-        return JSONResponse(content={"status": "failed", "message": str(e)}, status_code=500)
+        return JSONResponse(content={"status": "failed", "message": str(e), "uuid": request.uuid}, status_code=500)
     
     
     
@@ -212,23 +212,23 @@ def delete_all_questions(request: DeleteRequest):
 #Endpoint to delete ids
 # Define request body model
 class DeleteIDsRequest(BaseModel):
-    ids: List[str]  # List of IDs to delete
+    uuid: str # List of IDs to delete
 
-@app.delete("/api/delete-ids")
+@app.delete("/api/delete-item")
 def delete_by_ids(request: DeleteIDsRequest):
     try:
-        # Ensure the provided list is not empty
-        if not request.ids:
-            return JSONResponse(
-                content={"status": "failed", "message": "No IDs provided"},
-                status_code=400
-            )
+        
+        question_id = chromadb_collection.get(where={"uuid": request.uuid})
+        
+        if len(question_id['ids']) ==0:
+            return JSONResponse(content={"status": "Invalid", "message": "UUID not found", "uuid": request.uuid}, status_code=404)
+        
 
         # Delete the requested IDs from ChromaDB
-        chromadb_collection.delete(ids=request.ids)
+        chromadb_collection.delete(ids=[question_id['ids'][0]])
 
         return JSONResponse(
-            content={"status": "success", "message": f"Deleted {len(request.ids)} items", "deleted_ids": request.ids},
+            content={"status": "success", "message": "Deleted successfully", "uuid": request.uuid},
             status_code=200
         )
 
