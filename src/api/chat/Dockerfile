@@ -5,7 +5,6 @@ FROM python:3.10-slim
 # Set the working directory in the container
 WORKDIR /app
 
-
 # RUN apt-get update --fix-missing && apt-get install -y --fix-missing build-essential
 
 # Copy the requirements file and install dependencies

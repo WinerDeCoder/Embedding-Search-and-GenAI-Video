@@ -19,13 +19,13 @@ from models.gpt_models import correct_text_or_audio
 load_dotenv(".env")
 
 # ChromaDB Configuration
-collection_path = "vector_database"
+collection_path = "/app/vector_database"
 collection_name = os.getenv("CHROMADB_COLLECTION_NAME")
 embedding_func = define_embedding_function(api_key=os.getenv("OPENAI_API_KEY"), model_name=os.getenv("EMBEDDING_MODEL"))
 similarity_method = os.getenv("SIMILARITY_METHOD")
 chromadb_collection = get_chroma_collection(collection_path, collection_name, embedding_func, similarity_method)
 
-ask_again = "Xin lỗi bà con, Đạm Cà Mau hiện tại chưa thể trả lời câu hỏi này, kính mong bà con hãy hỏi câu hỏi khác."
+ask_again = "U là trời, câu hỏi này coi vậy mà khó ha, thôi từ từ anh hai cà mau trả lời sau nha, hỏi câu khác giúp mình nha."
 
 # Initialize FastAPI
 app = FastAPI()
@@ -53,40 +53,46 @@ async def root():
 class SearchQuery(BaseModel):
     text: str
     audio: str
+    num_query: int
     
 class QuestionResponse(BaseModel):
     question_id: str
     answer: str
 
 # Function to run blocking ChromaDB query in thread pool
-async def query_chromadb(corrected_text):
+async def query_chromadb(corrected_text, num_query):
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(executor, lambda: chromadb_collection.query(
-        query_texts=[corrected_text.content],
-        n_results=1
+        query_texts= [corrected_text.content],
+        n_results= num_query
     ))
 
 
 @app.post("/api/video-search")
 async def video_search(query: SearchQuery):
     if not query.text and not query.audio:
-        return QuestionResponse(question_id = "-1", answer = ask_again) 
+        return JSONResponse(content={"status": "error", "message": "Empty input"}, status_code=400)
     
     # Correct text asynchronously
     corrected_text = await asyncio.to_thread(correct_text_or_audio, query.text, query.audio)
 
     try:
         # Perform ChromaDB query asynchronously
-        results = await query_chromadb(corrected_text)
+        results = await query_chromadb(corrected_text, query.num_query)
 
-        if results["distances"][0][0] > 0.6:
-            return QuestionResponse(question_id = "-1", answer = ask_again)
-        else:
-            return QuestionResponse(question_id = results["metadatas"][0][0]["uuid"], answer = results["documents"][0][0])
-
+        paired_data = []
+        for doc, meta, dist in zip(results["documents"][0], results["metadatas"][0], results["distances"][0]):
+            paired_data.append({
+                "uuid": meta.get("uuid", ""),
+                "document": doc,
+                "distance": dist
+            })
+            
+        return JSONResponse(content={"status": "success", "data": paired_data}, status_code=200)
+    
     except Exception as e:
         print(f"Error: {e}")
-        return QuestionResponse(question_id = "-1", answer = ask_again)
+        return JSONResponse(content={"status": "error", "message": str(e)}, status_code=500)
     
 
 
@@ -126,15 +132,20 @@ def get_all_data():
         # Get all data from ChromaDB
         data = chromadb_collection.get()
 
-        # Filter only required fields
-        filtered_data = {
-            "documents": data.get("documents", []),
-            "uuids": [item['uuid'] for item in data["metadatas"]]
-        }
+        # Ensure we have the correct fields
+        documents = data.get("documents", [])
+        metadatas = [item['uuid'] for item in data["metadatas"]]
+        
+        # Pair documents with their corresponding UUIDs
+        paired_data = [
+            {"document": doc, "uuid": meta}
+            for doc, meta in zip(documents, metadatas)
+        ]
 
-        return JSONResponse(content={"status": "success", "data": filtered_data}, status_code=200)
+        return JSONResponse(content={"status": "success", "data": paired_data}, status_code=200)
 
     except Exception as e:
+        
         return JSONResponse(content={"status": "failed", "message": str(e)}, status_code=500)
     
 
