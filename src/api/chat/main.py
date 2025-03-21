@@ -63,7 +63,7 @@ class QuestionResponse(BaseModel):
 async def query_chromadb(corrected_text, num_query):
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(executor, lambda: chromadb_collection.query(
-        query_texts= [corrected_text.content],
+        query_texts= [corrected_text],
         n_results= num_query
     ))
 
@@ -88,7 +88,7 @@ async def video_search(query: SearchQuery):
                 "distance": dist
             })
             
-        return JSONResponse(content={"status": "success", "data": paired_data}, status_code=200)
+        return JSONResponse(content={"status": "success", "input_text": corrected_text, "data": paired_data}, status_code=200)
     
     except Exception as e:
         print(f"Error: {e}")

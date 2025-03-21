@@ -4,5 +4,5 @@ __pycache__/
 test/
 notebooks/
 .xlsx
-src/api/chat/vector_database
+src/api/chat/vector_database/
 data/

@@ -88,7 +88,7 @@ def correct_text_or_audio(input_text: str, input_audio: str) -> str:
         )
         
         corrected_text = completion.choices[0].message
-        return corrected_text
+        return corrected_text.content
     
     except Exception as e:
         print(f"Error: {e}")
