@@ -21,6 +21,16 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+
+# General Define
+heygen_api_key  = os.getenv("HEYGEN_API_KEY")
+headers         = {"Accept": "application/json", "X-API-KEY": heygen_api_key}
+template_id     = os.getenv("TEMPLATE_ID")
+
+generate_url    = f"https://api.heygen.com/v2/template/{template_id}/generate"
+template_url    = "https://api.heygen.com/v2/templates"
+
+
 #Payload
 def payload_setting(title, script):
     
@@ -44,12 +54,12 @@ def payload_setting(title, script):
     return payload
 
 
-# General Define
-heygen_api_key  = os.getenv("HEYGEN_API_KEY")
-headers         = {"Accept": "application/json", "X-API-KEY": heygen_api_key}
-template_id     = os.getenv("TEMPLATE_ID")
+    
+@app.get("/")
+async def root():
+    return {"message": "API is ready!"}
 
-generate_url    = f"https://api.heygen.com/v2/template/{template_id}/generate"
+
 
 class QARequest(BaseModel):
     uuid: str
@@ -61,8 +71,7 @@ class VideoResponse(BaseModel):
     message: str
     video_url: str
     
-    
-    
+
 def video_generator(title, script):
     
     payload = payload_setting(title, script)
@@ -108,10 +117,6 @@ def video_generator(title, script):
             
             return video_id, status, message, ""
     
-    
-@app.get("/")
-async def root():
-    return {"message": "API is ready!"}
 
 
 @app.post("/generate_video", response_model=VideoResponse)
@@ -128,3 +133,21 @@ def generate_video(request: QARequest):
         return VideoResponse(status = video_status, message = message, video_url=video_url)
     except Exception as e: 
         return VideoResponse(status = "error", message = f"Error: {e}", video_url="")
+
+
+
+# Get Template from HeyGen
+@app.get("/api/heygen-templates")
+def get_heygen_templates():
+    url = template_url
+    headers = {
+        "accept": "application/json",
+        "x-api-key": heygen_api_key
+    }
+    
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        return JSONResponse(content=response.json(), status_code=200)
+    else:
+        return JSONResponse(content={"error": "Failed to fetch templates"}, status_code=response.status_code)
