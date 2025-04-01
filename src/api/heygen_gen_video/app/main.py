@@ -25,9 +25,6 @@ app.add_middleware(
 # General Define
 heygen_api_key  = os.getenv("HEYGEN_API_KEY")
 headers         = {"Accept": "application/json", "X-API-KEY": heygen_api_key}
-template_id     = os.getenv("TEMPLATE_ID")
-
-generate_url    = f"https://api.heygen.com/v2/template/{template_id}/generate"
 template_url    = "https://api.heygen.com/v2/templates"
 
 
@@ -65,6 +62,7 @@ class QARequest(BaseModel):
     uuid: str
     question: str
     answer: str
+    template_id: str
 
 class VideoResponse(BaseModel):
     status: str
@@ -72,7 +70,9 @@ class VideoResponse(BaseModel):
     video_url: str
     
 
-def video_generator(title, script):
+def video_generator(title, script, template_id):
+    
+    generate_url    = f"https://api.heygen.com/v2/template/{template_id}/generate"
     
     payload = payload_setting(title, script)
     
@@ -126,8 +126,9 @@ def generate_video(request: QARequest):
         no = request.uuid 
         question = request.question
         answer = request.answer
+        template_id = request.template_id
         
-        video_id, video_status, message, video_url = video_generator(no, answer)
+        video_id, video_status, message, video_url = video_generator(no, answer, template_id)
         
 
         return VideoResponse(status = video_status, message = message, video_url=video_url)
