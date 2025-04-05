@@ -67,6 +67,7 @@ class QARequest(BaseModel):
 class VideoResponse(BaseModel):
     status: str
     message: str
+    video_id: str
     video_url: str
     
 
@@ -129,11 +130,12 @@ def generate_video(request: QARequest):
         template_id = request.template_id
         
         video_id, video_status, message, video_url = video_generator(no, answer, template_id)
-        
 
-        return VideoResponse(status = video_status, message = message, video_url=video_url)
+        return VideoResponse(status = video_status, message = message, video_id = video_id, video_url=video_url)
+    
     except Exception as e: 
-        return VideoResponse(status = "error", message = f"Error: {e}", video_url="")
+        
+        return VideoResponse(status = "error", message = f"Error: {e}", video_id = video_id, video_url="" )
 
 
 
@@ -152,3 +154,28 @@ def get_heygen_templates():
         return JSONResponse(content=response.json(), status_code=200)
     else:
         return JSONResponse(content={"error": "Failed to fetch templates"}, status_code=response.status_code)
+    
+
+
+class DeleteVideo(BaseModel):
+    video_id: str # List of IDs to delete
+    
+# Get Template from HeyGen
+@app.delete("/api/delete-video")
+def delete_video(request: DeleteVideo):
+    
+    video_id = request.video_id
+    
+    url = f"https://api.heygen.com/v1/video.delete?video_id={video_id}"
+    
+    headers = {
+        "accept": "application/json",
+        "x-api-key": heygen_api_key
+    }
+    
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        return JSONResponse(content=response.json(), status_code=200)
+    else:
+        return JSONResponse(content={"error": "Failed to delete video"}, status_code=response.status_code)
