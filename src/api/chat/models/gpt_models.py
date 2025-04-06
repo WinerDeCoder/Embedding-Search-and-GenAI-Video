@@ -26,7 +26,9 @@ def transcribe_audio(audio_bytes: bytes) -> str:
 
     transcription = client.audio.transcriptions.create(
         model="whisper-1",
-        file=audio_file
+        file=audio_file,
+        prompt="Tiếng Việt, P V C F C, phân bón NPK, Ure, Kali, Canxi, Photpho, Plus, N.Humate, NPK Cà Mau, Gold, T E.\
+                OM-CAMAU-ECO, N46. Protect, OM CAMAU RICH, INNOVA, GOOD, DAP, Magie, N46, cộng 0.1B, 13 Lưu Huỳnh"
     )
 
     return transcription.text
@@ -43,16 +45,24 @@ def correct_text_or_audio(input_text: str, input_audio: str) -> str:
     :return: Corrected text
     """
     prompt = \
-    f"""
-    Bạn là một chuyên gia tiếng Việt. Nhiệm vụ của bạn là phát hiện bất thường và chỉnh sửa câu hỏi đầu vào sao cho:
-    - Câu sau khi chỉnh sửa đúng ngữ pháp chính tả tiếng việt có dấu
+    f"""**Nhiệm vụ**: Bạn là một chuyên gia tiếng Việt. Nhiệm vụ của bạn là phát hiện bất thường và chỉnh sửa câu hỏi đầu vào sao cho:
+    - Câu sau khi chỉnh sửa đúng ngữ pháp chính tả tiếng việt có dấu, trừ những từ chuyên ngành về phân bón, nông nghiệp.
     - Số lượng từ trong câu phải giữ nguyên, không được thêm hoặc bớt.
-    - Không thêm bất kỳ từ hay ký tự nào khác ngoài việc chỉnh sửa trong từ.
-
-    Ghi chú: Chỉ trả lời câu hỏi đã chỉnh sửa mà không giải thích gì thêm. Luôn luôn trả lời dưới dạng text
-    Ví dụ: 
-        Nếu input là "Taij sao càn phải bón phaan howjpj lí cho cây ?", 
-        bạn sẽ chỉ output "Tại sao cần phải bón phân cho cây ?"
+    
+**Lưu ý quan trọng:**
+Trong câu hỏi đầu vào khả năng cao sẽ là về phân bón, hãy đảm bảo rằng các từ khóa sau viết đúng format (nếu có):
+    - Phân bón NPK (Gold) x x x, với x là số, ví dụ: Phân bón NPK 20 10 15, NPK Gold 20 10 10
+    - cộng Tê E
+    - N46 Protect/.True /.Golden/.Plus/Rich
+    - Urea Bio
+    - N.Humate  cộng  Tê E
+    - DAP
+    - OM CAMAU LIFE/FARM/NEED/HELP/GREEN/GOOD/ECO/Tê ECH/RICH/SUCCESS/INNOVA/HAPPY
+    
+**Ghi chú**: Chỉ trả lời câu hỏi đã chỉnh sửa mà không giải thích gì thêm. Luôn luôn trả lời dưới dạng text
+Ví dụ: 
+    - Nếu input là "Taij sao càn phải bón phaan howjpj lí cho cây ?", 
+    - bạn sẽ chỉ output "Tại sao cần phải bón phân cho cây ?"
     """
     
     try:
