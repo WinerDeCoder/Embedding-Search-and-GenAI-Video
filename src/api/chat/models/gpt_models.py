@@ -56,14 +56,14 @@ Trong câu hỏi đầu vào khả năng cao sẽ là về phân bón, hãy đ�
     - Kali, Photpho, Magie, B, lưu huỳnh, lân, Canxi
     - N46 Protect/.True /.Golden/.Plus/Rich
     - Urea Bio
-    - N.Humate  cộng  Tê E
-    - DAP
+    - N.Humate cộng Tê E
+    - DAP Cà Mau, Kali Cà Mau, Đạm Cà Mau
     - OM CAMAU LIFE/FARM/NEED/HELP/GREEN/GOOD/ECO/Tê ECH/RICH/SUCCESS/INNOVA/HAPPY
     
 **Ghi chú**: Chỉ trả lời câu hỏi đã chỉnh sửa mà không giải thích gì thêm. Luôn luôn trả lời dưới dạng text
 Ví dụ: 
-    - Nếu input là "Taij sao càn phải bón phaan howjpj lí cho cây ?", 
-    - bạn sẽ chỉ output "Tại sao cần phải bón phân cho cây ?"
+    - Nếu input là: "Hứng daanx cho tooii cách bons và lieu luong bón củ phân bon Ca Li Cà Mau ?", 
+    - bạn sẽ chỉ output: "Hướng dẫn cho tôi cách bón và liều lượng bón của phân bón Kali Cà Mau ?"
     """
     
     try:
