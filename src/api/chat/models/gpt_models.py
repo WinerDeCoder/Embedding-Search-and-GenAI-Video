@@ -53,6 +53,7 @@ def correct_text_or_audio(input_text: str, input_audio: str) -> str:
 Trong câu hỏi đầu vào khả năng cao sẽ là về phân bón, hãy đảm bảo rằng các từ khóa sau viết đúng format (nếu có):
     - Phân bón NPK (Gold) x x x, với x là số, ví dụ: Phân bón NPK 20 10 15, NPK Gold 20 10 10
     - cộng Tê E
+    - Kali, Photpho, Magie, B, lưu huỳnh, lân, Canxi
     - N46 Protect/.True /.Golden/.Plus/Rich
     - Urea Bio
     - N.Humate  cộng  Tê E
