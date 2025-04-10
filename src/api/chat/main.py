@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 from models.chromadb_functions import * 
 from models.gpt_models import correct_text_or_audio
-
+import time
 # Load environment variables
 load_dotenv(".env")
 
@@ -72,14 +72,23 @@ async def query_chromadb(corrected_text, num_query):
 async def video_search(query: SearchQuery):
     if not query.text and not query.audio:
         return JSONResponse(content={"status": "error", "message": "Empty input"}, status_code=400)
-    
-    # Correct text asynchronously
-    corrected_text = await asyncio.to_thread(correct_text_or_audio, query.text, query.audio)
 
     try:
-        # Perform ChromaDB query asynchronously
-        results = await query_chromadb(corrected_text, query.num_query)
+        # ⏱ Time tracking start
+        total_start = time.perf_counter()
 
+        # Step 1: Correct text
+        correct_start = time.perf_counter()
+        corrected_text = await asyncio.to_thread(correct_text_or_audio, query.text, query.audio)
+        correct_end = time.perf_counter()
+
+        # Step 2: Query ChromaDB
+        query_start = time.perf_counter()
+        results = await query_chromadb(corrected_text, query.num_query)
+        query_end = time.perf_counter()
+
+        # Step 3: Format result
+        format_start = time.perf_counter()
         paired_data = []
         for doc, meta, dist in zip(results["documents"][0], results["metadatas"][0], results["distances"][0]):
             paired_data.append({
@@ -87,9 +96,25 @@ async def video_search(query: SearchQuery):
                 "document": doc,
                 "distance": dist
             })
-            
-        return JSONResponse(content={"status": "success", "input_text": corrected_text, "data": paired_data}, status_code=200)
-    
+        format_end = time.perf_counter()
+
+        total_end = time.perf_counter()
+
+        # Prepare response
+        response = {
+            "status": "success",
+            "input_text": corrected_text,
+            "data": paired_data,
+            "timing": {
+                "text_correction_GPT": round(correct_end - correct_start, 4),
+                "chromadb_query_with_GPT_embedding": round(query_end - query_start, 4),
+                "formatting_result": round(format_end - format_start, 4),
+                "total": round(total_end - total_start, 4)
+            }
+        }
+
+        return JSONResponse(content=response, status_code=200)
+
     except Exception as e:
         print(f"Error: {e}")
         return JSONResponse(content={"status": "error", "message": str(e)}, status_code=500)
