@@ -8,3 +8,5 @@ src/api/chat/vector_database/
 data/
 */__pycache__/
 *__pycache__/
+
+src/models
