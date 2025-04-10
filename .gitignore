@@ -6,3 +6,5 @@ notebooks/
 .xlsx
 src/api/chat/vector_database/
 data/
+*/__pycache__/
+*__pycache__/
