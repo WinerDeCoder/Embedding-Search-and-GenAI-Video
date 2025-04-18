@@ -6,6 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name:  HeyGen_API_test
+    volumes:
+      - .:/app
     ports:
       - "8006:8000"
     environment:
