@@ -2,10 +2,13 @@ import os
 import json
 from fastapi import FastAPI
 from pydantic import BaseModel
+from typing import Literal
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import time
 import requests
+from pydantic import BaseModel, Field
+from typing import Optional
 from dotenv import load_dotenv
 load_dotenv(".env")
 
@@ -58,11 +61,13 @@ async def root():
 
 
 
+
 class QARequest(BaseModel):
-    uuid: str
-    question: str
-    answer: str
-    template_id: str
+    uuid: str = Field(..., description="uuid của câu hỏi - trả lời - video")
+    question: str = Field("", description="Question - Just leave empty string for now")
+    answer: str = Field(..., description="The script need to be spoken")
+    template_id: str = Field(..., description="The Template HeyGen to speak the answer")
+
 
 class VideoResponse(BaseModel):
     status: str
@@ -158,13 +163,37 @@ def get_heygen_templates():
 
 
 class DeleteVideo(BaseModel):
-    video_id: str # List of IDs to delete
+    uuid: str = Field(..., description="uuid của câu trả lời cần xóa") # List of IDs to delete
     
 # Get Template from HeyGen
 @app.delete("/api/delete-video")
 def delete_video(request: DeleteVideo):
     
-    video_id = request.video_id
+    video_uuid = request.uuid
+    
+    url = f"https://api.heygen.com/v1/video.list?limit=1&title={video_uuid}"
+
+    headers = {
+        "accept": "application/json",
+        "x-api-key": heygen_api_key
+    }
+    
+    response_get_list = requests.get(url, headers=headers)
+    
+    response_list = response_get_list.json()['data']
+
+    list_video = response_list["videos"]
+    
+    video_id = ""
+
+    for video in list_video:
+        if video["video_title"] == video_uuid:
+            video_id = video["video_id"]
+            break
+        
+        
+    if video_id == "":
+        return JSONResponse(content={"error": "Video not found"}, status_code=404)
     
     url = f"https://api.heygen.com/v1/video.delete?video_id={video_id}"
     
@@ -173,7 +202,7 @@ def delete_video(request: DeleteVideo):
         "x-api-key": heygen_api_key
     }
     
-    response = requests.get(url, headers=headers)
+    response = requests.delete(url, headers=headers)
     
     if response.status_code == 200:
         return JSONResponse(content=response.json(), status_code=200)
