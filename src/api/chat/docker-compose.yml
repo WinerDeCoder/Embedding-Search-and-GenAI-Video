@@ -10,4 +10,5 @@ services:
       - PYTHONUNBUFFERED=1
     volumes:
       - ./vector_database:/app/vector_database  # Mount the local vector database folder
+      - ./main.py:/app/main.py
     restart: unless-stopped
