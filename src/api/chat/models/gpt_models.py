@@ -58,7 +58,7 @@ Trong câu hỏi đầu vào khả năng cao sẽ là về phân bón, hãy đ�
     - Urea Bio
     - N.Humate cộng Tê E
     - DAP Cà Mau, Kali Cà Mau, Đạm Cà Mau
-    - OM CAMAU LIFE/FARM/NEED/HELP/GREEN/GOOD/ECO/Tê ECH/RICH/SUCCESS/INNOVA/HAPPY
+    - OM CAMAU LIFE / OM CAMAU FARM / OM CAMAU NEED / OM CAMAU HELP / OM CAMAU GREEN / OM CAMAU GOOD / OM CAMAU ECO / OM CAMAU Tê ECH / OM CAMAU RICH / OM CAMAU SUCCESS / OM CAMAU INNOVA / OM CAMAU HAPPY
     
 **Ghi chú**: Chỉ trả lời câu hỏi đã chỉnh sửa mà không giải thích gì thêm. Luôn luôn trả lời dưới dạng text
 Ví dụ: 
@@ -94,7 +94,7 @@ Ví dụ:
         #print(messages)
         
         completion = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4o",
             messages = messages
         )
         
