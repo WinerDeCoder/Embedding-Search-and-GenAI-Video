@@ -11,4 +11,5 @@ services:
     volumes:
       - ./vector_database:/app/vector_database  # Mount the local vector database folder
       - ./main.py:/app/main.py
+      - ./models:/app/models
     restart: unless-stopped
