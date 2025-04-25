@@ -13,7 +13,7 @@ from typing import List
 from dotenv import load_dotenv
 
 from models.chromadb_functions import * 
-from models.gpt_models import correct_text_or_audio
+from models.gpt_models import correct_text_or_audio, the_most_similar_doc
 import time
 # Load environment variables
 load_dotenv(".env")
@@ -59,6 +59,10 @@ class QuestionResponse(BaseModel):
     question_id: str
     answer: str
 
+class Most_Similar(BaseModel):
+    index: int 
+    
+
 # Function to run blocking ChromaDB query in thread pool
 async def query_chromadb(corrected_text, num_query):
     loop = asyncio.get_running_loop()
@@ -86,16 +90,30 @@ async def video_search(query: SearchQuery):
         query_start = time.perf_counter()
         results = await query_chromadb(corrected_text, query.num_query)
         query_end = time.perf_counter()
-
+        
         # Step 3: Format result
         format_start = time.perf_counter()
+        try:
+            top_index = await asyncio.to_thread(the_most_similar_doc, corrected_text, results)
+        except:
+            top_index = 0
         paired_data = []
+        
+        index = 0
         for doc, meta, dist in zip(results["documents"][0], results["metadatas"][0], results["distances"][0]):
-            paired_data.append({
+            
+            item = {
                 "uuid": meta.get("uuid", ""),
                 "document": doc,
                 "distance": dist
-            })
+            }
+            
+            if index != top_index:
+                paired_data.append(item)
+            else:
+                paired_data = [item] + paired_data
+            
+            index += 1
         format_end = time.perf_counter()
 
         total_end = time.perf_counter()
@@ -104,6 +122,7 @@ async def video_search(query: SearchQuery):
         response = {
             "status": "success",
             "input_text": corrected_text,
+            "exist": -1 if top_index == -1 else 1,
             "data": paired_data,
             "timing": {
                 "text_correction_GPT": round(correct_end - correct_start, 4),

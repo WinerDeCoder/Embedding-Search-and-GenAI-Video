@@ -34,6 +34,64 @@ def transcribe_audio(audio_bytes: bytes) -> str:
     return transcription.text
 
 
+class Most_Similar(BaseModel):
+    index: int 
+
+def the_most_similar_doc(question, results):
+    
+    results_docu = []
+    for index, docu in enumerate(results["documents"][0]):
+        results_docu.append({
+            "index": index,
+            "document": docu
+        })
+    
+    
+    completion = client.responses.parse(
+            model="gpt-4o-mini",
+            temperature= 0.4,
+            input = [ 
+                        { "role": "developer", "content": f"""
+**Vai trò, nhiệm vụ**:
+Bạn là 1 chuyên gia trong việc xác định matching câu hỏi gốc - câu hỏi biến thể dựa trên meaning và các từ, số giống nhau
+
+Người dùng sẽ gửi cho bạn 1 câu hỏi gốc, và 1 json object - mỗi phần tử chứa 1 câu hỏi và index tương ứng. Nhiệm vụ của bạn là so sánh câu hỏi gốc và các câu hỏi trong json. Sau đó trả ra index của câu hỏi giống câu hỏi gốc nhất , nếu không có sẽ trả về -1
+
+**Ví dụ**:
+Câu hỏi gốc: Hướng dẫn cách bón phân NPK Cà Mau 18 8 18
+
+Các câu hỏi trong json object:
+[{{
+    "index": 0,
+    "document": "Hướng dãn cho tôi cách bón phân NPK Cà Mau 18 18 8"  
+}},
+{{
+    "index": 1,
+    "document": "Hướng dãn cho tôi cách bón phân cho phân bón NPK Cà Mau 18 8 18"  
+}},
+{{
+    "index": 2,
+    "document": "Phân bón NPK Cà Mau 18 8 18 có những thành phần gì"  
+}}
+]
+
+Thì lúc này bạn sẽ output ra "1", vì document 1 match với câu hỏi gốc về ngữ nghĩa hỏi về cách dùng phân bón 18 8 18, 
+còn index 0 dù đúng ngữ nghĩa nhưng bị sai tên thành 18 18 8 nên không match
+Còn index 2 tuy match sản phẩm 18 8 18 nhưng ngữ nghĩa câu hỏi không giống nhau
+
+Trường hợp nếu như bạn thấy không có câu hỏi biến thể nào thỏa mãn câu hỏi gốc thì hãy output "-1"
+        
+**Lưu ý**:
+- Các câu hỏi sẽ đa số về phân bón với các kí hiệu phân bón
+- Nên so sánh ở mức độ giống nhau về cả ngữ nghĩa và các chữ trùng, ví dụ: "18 8 18" sẽ trùng với "18 8 18" thay vì "18 18 8"
+- Bắt buộc phải trả về 1 index trong tập json hoặc -1, không được trả về index nào khác
+"""},
+                        {"role": "user", "content": f"""Đây là câu hỏi gốc: {question}
+Đây là list các json object chứa câu hỏi và index tương ứng: {results_docu}""" }],
+            text_format=Most_Similar,
+        )
+            
+    return completion.output_parsed.index
 
 def correct_text_or_audio(input_text: str, input_audio: str) -> str:
     """
