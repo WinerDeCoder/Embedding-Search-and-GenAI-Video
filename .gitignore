@@ -3,7 +3,7 @@ __pycache__/
 *.ipynb
 test/
 notebooks/
-.xlsx
+*.xlsx
 src/api/chat/vector_database/
 data/
 */__pycache__/
