@@ -48,7 +48,7 @@ def the_most_similar_doc(question, results):
     
     
     completion = client.responses.parse(
-            model="gpt-4o-mini",
+            model="gpt-4.1-nano",
             temperature= 0.4,
             input = [ 
                         { "role": "developer", "content": f"""
@@ -78,6 +78,12 @@ Các câu hỏi trong json object:
 Thì lúc này bạn sẽ output ra "1", vì document 1 match với câu hỏi gốc về ngữ nghĩa hỏi về cách dùng phân bón 18 8 18, 
 còn index 0 dù đúng ngữ nghĩa nhưng bị sai tên thành 18 18 8 nên không match
 Còn index 2 tuy match sản phẩm 18 8 18 nhưng ngữ nghĩa câu hỏi không giống nhau
+
+**Trường hợp đặc biệt*:
+Có một số trường hợp có thể match nhau nhưng không cần giống hoàn toàn như sau thì vẫn cho match:
+- TECH với Tê ECH
+- TE với Tê E
+- Các nguyên tố hóa học như: S - lưu huỳnh, P - Photpho, C - Canxi, K - Kali,...
 
 Trường hợp nếu như bạn thấy không có câu hỏi biến thể nào thỏa mãn câu hỏi gốc thì hãy output "-1"
         
@@ -116,11 +122,11 @@ Trong câu hỏi đầu vào khả năng cao sẽ là về phân bón, hãy đ�
     - Urea Bio
     - N.Humate cộng Tê E
     - DAP Cà Mau, Kali Cà Mau, Đạm Cà Mau
-    - OM CAMAU LIFE / OM CAMAU FARM / OM CAMAU NEED / OM CAMAU HELP / OM CAMAU GREEN / OM CAMAU GOOD / OM CAMAU ECO / OM CAMAU Tê ECH / OM CAMAU RICH / OM CAMAU SUCCESS / OM CAMAU INNOVA / OM CAMAU HAPPY
+    - OM CAMAU LIFE / OM CAMAU FARM / OM CAMAU NEED / OM CAMAU HELP / OM CAMAU GREEN / OM CAMAU GOOD / OM CAMAU ECO / OM CAMAU TECH / OM CAMAU RICH / OM CAMAU SUCCESS / OM CAMAU INNOVA / OM CAMAU HAPPY
     
 **Ghi chú**: Chỉ trả lời câu hỏi đã chỉnh sửa mà không giải thích gì thêm. Luôn luôn trả lời dưới dạng text
 Ví dụ: 
-    - Nếu input là: "Hứng daanx cho tooii cách bons và lieu luong bón củ phân bon Ca Li Cà Mau ?", 
+    - Nếu input là: "Hứng daanx cho tooii cách bons và lieu luong bón củ phân bon Ca Li Cà Mau ?",
     - bạn sẽ chỉ output: "Hướng dẫn cho tôi cách bón và liều lượng bón của phân bón Kali Cà Mau ?"
     """
     
@@ -153,6 +159,7 @@ Ví dụ:
         
         completion = client.chat.completions.create(
             model="gpt-4o-mini",
+            temperature= 0.7,
             messages = messages
         )
         
