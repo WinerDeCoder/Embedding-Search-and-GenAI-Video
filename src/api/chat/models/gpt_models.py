@@ -79,11 +79,11 @@ Thì lúc này bạn sẽ output ra "1", vì document 1 match với câu hỏi g
 còn index 0 dù đúng ngữ nghĩa nhưng bị sai tên thành 18 18 8 nên không match
 Còn index 2 tuy match sản phẩm 18 8 18 nhưng ngữ nghĩa câu hỏi không giống nhau
 
-** Ngoại lệ*:
-Có một số trường hợp có thể match nhau nhưng không giống hoàn toàn như sau thì vẫn cho match:
+**Trường hợp đặc biệt*:
+Có một số trường hợp có thể match nhau nhưng không cần giống hoàn toàn như sau thì vẫn cho match:
 - TECH với Tê ECH
 - TE với Tê E
-- Các nguyên tố hóa học như: S - lưu huỳnh, P - Photpho, C- Canxi, K-Kali,...
+- Các nguyên tố hóa học như: S - lưu huỳnh, P - Photpho, C - Canxi, K - Kali,...
 
 Trường hợp nếu như bạn thấy không có câu hỏi biến thể nào thỏa mãn câu hỏi gốc thì hãy output "-1"
         
