@@ -28,7 +28,7 @@ def transcribe_audio(audio_bytes: bytes) -> str:
         model="whisper-1",
         file=audio_file,
         prompt="Tiếng Việt, P V C F C, phân bón NPK, Ure, Kali, Canxi, Photpho, Plus, N.Humate, NPK Cà Mau, Gold, T E.\
-                OM-CAMAU-ECO, N46. Protect, OM CAMAU RICH, INNOVA, GOOD, DAP, Magie, N46, cộng 0.1B, 13 Lưu Huỳnh"
+                OM-CAMAU-ECO, N46. Protect, OM CAMAU RICH, INNOVA, GOOD, DAP, Magie, N46, cộng 0.1B, 13 Lưu Huỳnh, + "
     )
 
     return transcription.text
@@ -48,7 +48,7 @@ def the_most_similar_doc(question, results):
     
     
     completion = client.responses.parse(
-            model="gpt-4o-mini",
+            model="gpt-4.1-mini",
             temperature= 0.7,
             input = [ 
                         { "role": "developer", "content": f"""
@@ -72,25 +72,30 @@ Các câu hỏi trong json object:
 {{
     "index": 2,
     "document": "Phân bón NPK Cà Mau 18 8 18 có những thành phần gì"  
+}},
+{{
+    "index": 3,
+    "document": "Phân bón NPK Cà Mau 18 8 18 + 10S + TE có những thành phần gì"  
 }}
 ]
 
 Thì lúc này bạn sẽ output ra "1", vì document 1 match với câu hỏi gốc về ngữ nghĩa hỏi về cách dùng phân bón 18 8 18, 
 còn index 0 dù đúng ngữ nghĩa nhưng bị sai tên thành 18 18 8 nên không match
 Còn index 2 tuy match sản phẩm 18 8 18 nhưng ngữ nghĩa câu hỏi không giống nhau
+Còn index 3 tuy match sản phẩm 18 8 18 nhưng có thêm + 10S + TE, suy ra khác loại nên không match
 
 **Trường hợp đặc biệt*:
 Có một số trường hợp có thể match nhau nhưng không cần giống hoàn toàn như sau thì vẫn cho match:
 - TECH với Tê ECH
 - TE với Tê E
-- Các nguyên tố hóa học như: S - lưu huỳnh, P - Photpho, C - Canxi, K - Kali,...
+- Các nguyên tố hóa học như: S với lưu huỳnh, P với Photpho, Ca với Canxi, K với Kali,...
 
 Trường hợp nếu như bạn thấy không có câu hỏi biến thể nào thỏa mãn câu hỏi gốc thì hãy output "-1"
         
 **Lưu ý**:
 - Các câu hỏi sẽ đa số về phân bón với các kí hiệu phân bón
-- Nên so sánh ở mức độ giống nhau về cả ngữ nghĩa và các chữ trùng, ví dụ: "18 8 18" sẽ trùng với "18 8 18" thay vì "18 18 8"
-- Bắt buộc phải trả về 1 index trong tập json hoặc -1, không được trả về index nào khác
+- So sánh ở mức độ giống nhau về cả ngữ nghĩa và các chữ trùng
+- Bắt buộc phải trả về index trong tập json hoặc -1, không được trả về index nào khác
 """},
                         {"role": "user", "content": f"""Đây là câu hỏi gốc: {question}
 Đây là list các json object chứa câu hỏi và index tương ứng: {results_docu}""" }],
@@ -116,14 +121,23 @@ def correct_text_or_audio(input_text: str, input_audio: str) -> str:
 **Lưu ý quan trọng:**
 Trong câu hỏi đầu vào khả năng cao sẽ là về phân bón, hãy đảm bảo rằng các từ khóa sau viết đúng format (nếu có):
     - Phân bón NPK (Gold) x x x, với x là số, ví dụ: Phân bón NPK 20 10 15, NPK Gold 20 10 10
-    - cộng Tê E
-    - Kali, Photpho, Magie, B, lưu huỳnh, lân, Canxi
+    - TE
+    - K - Kali, P - Photpho, Mg - Magie, B, S - lưu huỳnh, lân, Ca - Canxi
     - N46 Protect / N46 .True / N46 .Golden/ N46 .Plus/ N46 Rich
     - Urea Bio
-    - N.Humate cộng Tê E
+    - N.Humate
     - DAP Cà Mau, Kali Cà Mau, Đạm Cà Mau
     - OM CAMAU LIFE / OM CAMAU FARM / OM CAMAU NEED / OM CAMAU HELP / OM CAMAU GREEN / OM CAMAU GOOD / OM CAMAU ECO / OM CAMAU TECH / OM CAMAU RICH / OM CAMAU SUCCESS / OM CAMAU INNOVA / OM CAMAU HAPPY
-    
+
+Các tên này có thể kết hợp với nhau ( có thể viết liền hoặc bởi dấu cộng )
+**Một số ví dụ của tên phân bón hay gặp:**:
+- phân bón NPK 15 15 15 + 10S  + TE
+- Phân bón N.Humate + TE Cà Mau
+- phân bón NPK 20 15 7 + 1 Magie + TE
+- phân bón NPK Gold 20 20 15 + TE
+- phân bón NPK 16 16 8 + 13 lưu huỳnh + 1 Magie + 0,1B
+- phân bón OM CAMAU TECH
+
 **Ghi chú**: Chỉ trả lời câu hỏi đã chỉnh sửa mà không giải thích gì thêm. Luôn luôn trả lời dưới dạng text
 Ví dụ: 
     - Nếu input là: "Hứng daanx cho tooii cách bons và lieu luong bón củ phân bon Ca Li Cà Mau ?",
