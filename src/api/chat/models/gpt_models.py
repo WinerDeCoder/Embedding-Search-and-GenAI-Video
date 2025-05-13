@@ -28,7 +28,7 @@ def transcribe_audio(audio_bytes: bytes) -> str:
         model="whisper-1",
         file=audio_file,
         prompt="Tiếng Việt, P V C F C, phân bón NPK, Ure, Kali, Canxi, Photpho, Plus, N.Humate, NPK Cà Mau, Gold, T E.\
-                OM-CAMAU-ECO, N46. Protect, OM CAMAU RICH, INNOVA, GOOD, DAP, Magie, N46, cộng 0.1B, 13 Lưu Huỳnh, + "
+                OM-CAMAU-ECO, N46. Protect, OM CAMAU RICH, INNOVA, GOOD, DAP, Magie, N46, cộng 0.1B, 13 Lưu Huỳnh, +, AHCM, HCM "
     )
 
     return transcription.text
@@ -48,7 +48,7 @@ def the_most_similar_doc(question, results):
     
     
     completion = client.responses.parse(
-            model="gpt-4.1-mini",
+            model="gpt-4o-mini",
             temperature= 0.7,
             input = [ 
                         { "role": "developer", "content": f"""
@@ -85,13 +85,14 @@ Còn index 2 tuy match sản phẩm 18 8 18 nhưng ngữ nghĩa câu hỏi khôn
 Còn index 3 tuy match sản phẩm 18 8 18 nhưng có thêm + 10S + TE, suy ra khác loại nên không match
 
 **Trường hợp đặc biệt*:
-Có một số trường hợp có thể match nhau nhưng không cần giống hoàn toàn như sau thì vẫn cho match:
-- TECH với Tê ECH
-- TE với Tê E
-- Các nguyên tố hóa học như: S với lưu huỳnh, P với Photpho, Ca với Canxi, K với Kali,...
+Có một số trường hợp có thể match nhau nhưng không cần giống hoàn toàn như sau thì vẫn cho match vì đây là 1 số trường hợp viết tắt:
+- TECH và Tê ECH
+- TE và Tê E
+- Các nguyên tố hóa học như: S và lưu huỳnh, P và Photpho, Ca và Canxi, K và Kali,...
+- AHCM và Anh Hai Cà Mau
+- HCM và Hồ Chí Minh
+- MVTL và Mùa vàng thắng lớn 
 
-Trường hợp nếu như bạn thấy không có câu hỏi biến thể nào thỏa mãn câu hỏi gốc thì hãy output "-1"
-        
 **Lưu ý**:
 - Các câu hỏi sẽ đa số về phân bón với các kí hiệu phân bón
 - So sánh ở mức độ giống nhau về cả ngữ nghĩa và các chữ trùng
