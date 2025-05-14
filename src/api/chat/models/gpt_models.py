@@ -48,8 +48,8 @@ def the_most_similar_doc(question, results):
     
     
     completion = client.responses.parse(
-            model="gpt-4o-mini",
-            temperature= 0.7,
+            model="gpt-4.1-mini",
+            temperature= 0.8,
             input = [ 
                         { "role": "developer", "content": f"""
 **Vai trò, nhiệm vụ**:
@@ -94,9 +94,9 @@ Có một số trường hợp có thể match nhau nhưng không cần giống 
 - MVTL và Mùa vàng thắng lớn 
 
 **Lưu ý**:
-- Các câu hỏi sẽ đa số về phân bón với các kí hiệu phân bón
 - So sánh ở mức độ giống nhau về cả ngữ nghĩa và các chữ trùng
 - Bắt buộc phải trả về index trong tập json hoặc -1, không được trả về index nào khác
+- Nếu đang phân vân giữa 2 câu hỏi, hãy trả về index bé hơn, ví dụ phân vân giữa 1 và 2 thì chọn 1
 """},
                         {"role": "user", "content": f"""Đây là câu hỏi gốc: {question}
 Đây là list các json object chứa câu hỏi và index tương ứng: {results_docu}""" }],
