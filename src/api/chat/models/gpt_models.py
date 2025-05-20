@@ -53,14 +53,12 @@ def the_most_similar_doc(question, results):
             input = [ 
                         { "role": "developer", "content": f"""
 **Vai trò, nhiệm vụ**:
-Bạn là 1 chuyên gia làm việc cho Công ty cổ phần Phân Bón Dầu Khí Cà Mau hay Phân Bón Cà Mau (PVCFC), nhiệm vụ của bạn là xác định matching câu hỏi gốc - câu hỏi biến thể dựa trên meaning và các từ, số giống nhau
-
-Người dùng sẽ gửi cho bạn 1 câu hỏi gốc, và 1 json object - mỗi phần tử chứa 1 câu hỏi và index tương ứng. Nhiệm vụ của bạn là so sánh câu hỏi gốc và các câu hỏi trong json. Sau đó trả ra index của câu hỏi giống câu hỏi gốc nhất , nếu không có sẽ trả về -1
+Bạn là 1 chuyên gia chăm sóc khách hàng làm việc cho Công ty cổ phần Phân Bón Dầu Khí Cà Mau hay Phân Bón Cà Mau, Đạm Cà Mau (PVCFC), 
+Nhiệm vụ của bạn là chọn trong bộ câu hỏi dưới dạng Json đã soạn sẵn của công ty về các kiến thức của công ty và phân bón , lấy ra index câu hỏi giống nhất với câu hỏi của người dùng 
 
 **Ví dụ**:
-Câu hỏi gốc: Hướng dẫn cách bón phân NPK Cà Mau 18 8 18
-
-Các câu hỏi trong json object:
+Câu hỏi của người dùng: Hướng dẫn cách bón phân NPK Cà Mau 18 8 18 của công ty
+Bộ câu hỏi của công ty:
 [{{
     "index": 0,
     "document": "Hướng dãn cho tôi cách bón phân NPK Cà Mau 18 18 8"  
@@ -72,17 +70,10 @@ Các câu hỏi trong json object:
 {{
     "index": 2,
     "document": "Phân bón NPK Cà Mau 18 8 18 có những thành phần gì"  
-}},
-{{
-    "index": 3,
-    "document": "Phân bón NPK Cà Mau 18 8 18 + 10S + TE có những thành phần gì"  
 }}
 ]
 
 Thì lúc này bạn sẽ output ra "1", vì document 1 match với câu hỏi gốc về ngữ nghĩa hỏi về cách dùng phân bón 18 8 18, 
-còn index 0 dù đúng ngữ nghĩa nhưng bị sai tên thành 18 18 8 nên không match
-Còn index 2 tuy match sản phẩm 18 8 18 nhưng ngữ nghĩa câu hỏi không giống nhau
-Còn index 3 tuy match sản phẩm 18 8 18 nhưng có thêm + 10S + TE, suy ra khác loại nên không match
 
 **Trường hợp đặc biệt*:
 Có một số trường hợp có thể match nhau nhưng không cần giống hoàn toàn như sau thì vẫn cho match vì đây là 1 số trường hợp viết tắt:
@@ -94,12 +85,14 @@ Có một số trường hợp có thể match nhau nhưng không cần giống 
 - MVTL và Mùa vàng thắng lớn 
 
 **Lưu ý**:
-- So sánh ở mức độ giống nhau về cả ngữ nghĩa và các chữ trùng
-- Bắt buộc phải trả về index trong tập json hoặc -1, không được trả về index nào khác
-- Nếu đang phân vân giữa 2 câu hỏi, hãy trả về index bé hơn, ví dụ phân vân giữa 1 và 2 thì chọn 1
+- Nếu như không chọn được câu hỏi nào, hãy output ra -1
+
+Đây là bộ câu hỏi của công ty :
+
+{results_docu}
+
 """},
-                        {"role": "user", "content": f"""Đây là câu hỏi gốc: {question}
-Đây là list các json object chứa câu hỏi và index tương ứng: {results_docu}""" }],
+                        {"role": "user", "content": f"""{question}""" }],
             text_format=Most_Similar,
         )
             
