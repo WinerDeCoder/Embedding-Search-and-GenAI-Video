@@ -49,12 +49,12 @@ def the_most_similar_doc(question, results):
     
     completion = client.responses.parse(
             model="gpt-4.1-mini",
-            temperature= 0.8,
+            temperature= 0.7,
             input = [ 
                         { "role": "developer", "content": f"""
 **Vai trò, nhiệm vụ**:
 Bạn là 1 chuyên gia chăm sóc khách hàng làm việc cho Công ty cổ phần Phân Bón Dầu Khí Cà Mau hay Phân Bón Cà Mau, Đạm Cà Mau (PVCFC), 
-Nhiệm vụ của bạn là chọn trong bộ câu hỏi dưới dạng Json đã soạn sẵn của công ty về các kiến thức của công ty và phân bón , lấy ra index câu hỏi giống nhất với câu hỏi của người dùng 
+Nhiệm vụ của bạn là chọn trong bộ câu hỏi dưới dạng Json đã soạn sẵn của công ty về các kiến thức của công ty và phân bón , lấy ra index câu hỏi giống nhất,phù hợp nhất với câu hỏi của người dùng hỏi về các thông tin, sản phẩm, các sự kiện, khuyến mãi của công ty
 
 **Ví dụ**:
 Câu hỏi của người dùng: Hướng dẫn cách bón phân NPK Cà Mau 18 8 18 của công ty
@@ -108,11 +108,15 @@ def correct_text_or_audio(input_text: str, input_audio: str) -> str:
     :return: Corrected text
     """
     prompt = \
-    f"""**Nhiệm vụ**: Bạn là một chuyên gia tiếng Việt làm việc cho Công ty cổ phần Phân Bón Dầu Khí Cà Mau hay Phân Bón Cà Mau (PVCFC). Nhiệm vụ của bạn là phát hiện bất thường và chỉnh sửa câu hỏi đầu vào sao cho:
-    - Câu sau khi chỉnh sửa đúng ngữ pháp chính tả tiếng việt có dấu, trừ những từ chuyên ngành về phân bón, nông nghiệp.
-    - Số lượng từ trong câu phải giữ nguyên, không được thêm hoặc bớt.
+    f"""**Nhiệm vụ:**
+Bạn là chuyên gia ngôn ngữ của Công ty Phân bón Cà Mau (PVCFC). Bạn cần phát hiện lỗi chính tả, ngữ pháp, và hiệu chỉnh lại câu hỏi đầu vào như sau:
+
+Nếu câu hỏi đã đầy đủ, chỉ sửa lỗi sai chính tả, ngữ pháp.
+Nếu câu hỏi quá ngắn, thiếu ý hoặc chưa rõ nghĩa, hãy viết lại hoặc bổ sung ý để câu hỏi rõ ràng, đầy đủ và có khả năng query ra đáp án chi tiết hơn.
     
 **Lưu ý quan trọng:**
+- Viết chính xác tiếng Việt, có dấu đúng chuẩn.
+
 Trong câu hỏi đầu vào khả năng cao sẽ là về phân bón, hãy đảm bảo rằng các từ khóa sau viết đúng format (nếu có):
     - Phân bón NPK (Gold) x x x, với x là số, ví dụ: Phân bón NPK 20 10 15, NPK Gold 20 10 10
     - TE
@@ -125,17 +129,28 @@ Trong câu hỏi đầu vào khả năng cao sẽ là về phân bón, hãy đ�
 
 Các tên này có thể kết hợp với nhau ( có thể viết liền hoặc bởi dấu cộng )
 **Một số ví dụ của tên phân bón hay gặp:**:
-- phân bón NPK 15 15 15 + 10S  + TE
-- Phân bón N.Humate + TE Cà Mau
-- phân bón NPK 20 15 7 + 1 Magie + TE
-- phân bón NPK Gold 20 20 15 + TE
-- phân bón NPK 16 16 8 + 13 lưu huỳnh + 1 Magie + 0,1B
-- phân bón OM CAMAU TECH
+    - phân bón NPK 15 15 15 + 10S + TE
+    - Phân bón N.Humate + TE Cà Mau
+    - phân bón NPK 16 16 8 + 13 lưu huỳnh + 1 Magie + 0,1B
+    - phân bón OM CAMAU TECH
 
 **Ghi chú**: Chỉ trả lời câu hỏi đã chỉnh sửa mà không giải thích gì thêm. Luôn luôn trả lời dưới dạng text
 Ví dụ: 
     - Nếu input là: "Hứng daanx cho tooii cách bons và lieu luong bón củ phân bon Ca Li Cà Mau ?",
     - bạn sẽ chỉ output: "Hướng dẫn cho tôi cách bón và liều lượng bón của phân bón Kali Cà Mau ?"
+    
+    - Input: "Địa chỉ"
+    - Output: "Địa chỉ công ty Phân Bón Cà Mau ở đâu ?"
+    
+    - Input: "NPK là gì"
+    - Output: "Giới thiệu cho tôi phân bón NPK ?" 
+    
+    - Input: "16 16 8 là gì ?"
+    - Output: "Giới thiệu cho tôi phân bón 16 16 8 ?"
+    
+    - Input: "Công dụng 16 16 8 là gì ?"
+    - Output: "Cho tôi biết công dụng của phân bón 16 16 8 như thế nào ?"
+    
     """
     
     try:
@@ -166,8 +181,8 @@ Ví dụ:
         #print(messages)
         
         completion = client.chat.completions.create(
-            model="gpt-4o-mini",
-            temperature= 0.7,
+            model="gpt-4.1-mini",
+            temperature= 0.8,
             messages = messages
         )
         
