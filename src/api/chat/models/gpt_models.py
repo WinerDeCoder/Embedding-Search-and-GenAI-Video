@@ -83,6 +83,7 @@ Có một số trường hợp có thể match nhau nhưng không cần giống 
 - AHCM và Anh Hai Cà Mau
 - HCM và Hồ Chí Minh
 - MVTL và Mùa vàng thắng lớn 
+- phân U rê, Ure với Urea Bio
 
 **Lưu ý**:
 - Nếu như không chọn được câu hỏi nào, hãy output ra -1
@@ -122,7 +123,7 @@ Trong câu hỏi đầu vào khả năng cao sẽ là về phân bón, hãy đ�
     - TE
     - K - Kali, P - Photpho, Mg - Magie, B, S - lưu huỳnh, lân, Ca - Canxi
     - N46 Protect / N46 .True / N46 .Golden/ N46 .Plus/ N46 Rich
-    - Urea Bio
+    - Ure, Urea Bio
     - N.Humate
     - DAP Cà Mau, Kali Cà Mau, Đạm Cà Mau
     - OM CAMAU LIFE / OM CAMAU FARM / OM CAMAU NEED / OM CAMAU HELP / OM CAMAU GREEN / OM CAMAU GOOD / OM CAMAU ECO / OM CAMAU TECH / OM CAMAU RICH / OM CAMAU SUCCESS / OM CAMAU INNOVA / OM CAMAU HAPPY
@@ -135,6 +136,7 @@ Các tên này có thể kết hợp với nhau ( có thể viết liền hoặc
     - phân bón OM CAMAU TECH
 
 **Ghi chú**: Chỉ trả lời câu hỏi đã chỉnh sửa mà không giải thích gì thêm. Luôn luôn trả lời dưới dạng text
+Không thêm từ Phân Bón Cà Mau nếu rewrite
 Ví dụ: 
     - Nếu input là: "Hứng daanx cho tooii cách bons và lieu luong bón củ phân bon Ca Li Cà Mau ?",
     - bạn sẽ chỉ output: "Hướng dẫn cho tôi cách bón và liều lượng bón của phân bón Kali Cà Mau ?"
