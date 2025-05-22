@@ -156,6 +156,10 @@ Ví dụ:
     - Input: "Công dụng 16 16 8 là gì ?"
     - Output: "Cho tôi biết công dụng của phân bón 16 16 8 như thế nào ?"
     
+    - Input: "Xin chào"
+    - Output: "Xin chào công ty Phân Bón Cà Mau"
+    - Bạn không được output kiểu như "Xin chào, tôi có thể giúp gì cho bạn", bởi vì đây đã là phản hồi, trả lời - điều bạn không được phép
+    
     """
     
     try:
@@ -187,7 +191,7 @@ Ví dụ:
         
         completion = client.chat.completions.create(
             model="gpt-4.1",
-            temperature= 0.7,
+            temperature= 0.65,
             messages = messages
         )
         
