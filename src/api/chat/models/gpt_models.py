@@ -48,7 +48,7 @@ def the_most_similar_doc(question, results):
     
     
     completion = client.responses.parse(
-            model="gpt-4.1",
+            model="gpt-4.1-mini",
             temperature= 0.7,
             input = [ 
                         { "role": "developer", "content": f"""
@@ -86,8 +86,10 @@ Có một số trường hợp có thể match nhau nhưng không cần giống 
 - Urea đồng nghĩa với Urea Bio
 
 **Lưu ý**:
-- Nếu như không chọn được câu hỏi nào, hãy output ra -1
-
+- Để ý các từ khoá tên riêng
+- Sẽ có trường hợp câu hỏi người dùng không khớp với bất kì câu hỏi nào trong bộ câu hỏi, nếu không khớp thì output ra -1
+- Nếu người dùng hỏi đại khải kiểu "Là gì ?" ở lĩnh vực phân bón thì nên match với câu "giới thiệu" chứ không phải "công dụng"
+- Một chút Ưu tiên những câu hỏi có score thấp hơn nếu phải lựa chọn giữa 2 câu
 **Đây là bộ câu hỏi của công ty :**
 
 {results_docu}
@@ -110,57 +112,48 @@ def correct_text_or_audio(input_text: str, input_audio: str) -> str:
     """
     prompt = \
     f"""**Nhiệm vụ:**
-Bạn là chuyên gia ngôn ngữ của Công ty Phân bón Cà Mau (PVCFC). Bạn cần phát hiện lỗi chính tả, ngữ pháp, và hiệu chỉnh lại câu hỏi đầu vào như sau:
+Bạn là chuyên gia ngôn ngữ của Công ty Phân bón Cà Mau (PVCFC).
+Nhiệm vụ của bạn là hiệu chỉnh câu hỏi đầu vào theo yêu cầu sau:
 
-Nếu câu hỏi đã đầy đủ, chỉ sửa lỗi sai chính tả, ngữ pháp.
-Nếu câu hỏi quá ngắn, thiếu ý hoặc chưa rõ nghĩa, hãy viết lại cho dài hơn, rõ ràng hơn để có khả năng query ra đáp án chi tiết hơn.
-    
-**Lưu ý quan trọng:**
-- Viết chính xác tiếng Việt, có dấu đúng chuẩn.
+Yêu cầu chỉnh sửa:
+- Nếu câu hỏi đã rõ ràng, chỉ sửa lỗi chính tả và ngữ pháp.
+- Nếu câu hỏi quá ngắn, thiếu ý, hoặc không rõ nghĩa, hãy viết lại cho dài hơn, rõ ràng hơn, giữ nguyên ý gốc để có thể truy vấn được câu trả lời chi tiết hơn.
+
+**Ghi chú**: Chỉ output ra câu hỏi đã chỉnh sửa hoặc câu hỏi gốc nếu không có vấn đề gì mà không giải thích gì thêm, không trả lời cũng như không tư vấn gì
+- Nếu có bổ sung thêm ý, bắt buộc vẫn giữ nguyên ý nghĩa câu hỏi, không thêm ý khác vào câu hỏi, dựa vào các ví dụ ở dưới
 
 Trong câu hỏi đầu vào khả năng cao sẽ là về phân bón, hãy đảm bảo rằng các từ khóa sau viết đúng format (nếu có):
     - Phân bón NPK (Gold) x x x, với x là số, ví dụ: Phân bón NPK 20 10 15, NPK Gold 20 10 10
     - TE
     - K - Kali, P - Photpho, Mg - Magie, B, S - lưu huỳnh, lân, Ca - Canxi
     - N46 Protect / N46 .True / N46 .Golden/ N46 .Plus/ N46 Rich
-    - Ure, Urea, Urea Bio ( pay attention, Ure and Urea are different)
+    - Ure, Urea, Urea Bio
     - N.Humate
     - DAP Cà Mau, Kali Cà Mau, Đạm Cà Mau
     - OM CAMAU LIFE / OM CAMAU FARM / OM CAMAU NEED / OM CAMAU HELP / OM CAMAU GREEN / OM CAMAU GOOD / OM CAMAU ECO / OM CAMAU TECH / OM CAMAU RICH / OM CAMAU SUCCESS / OM CAMAU INNOVA / OM CAMAU HAPPY
+Các tên này có thể được viết liền nhau hoặc có dấu cộng (+).
 
-Các tên này có thể kết hợp với nhau ( có thể viết liền hoặc bởi dấu cộng )
-**Một số ví dụ của tên phân bón hay gặp:**:
-    - phân bón NPK 15 15 15 + 10S + TE
-    - Phân bón N.Humate + TE Cà Mau
-    - phân bón NPK 16 16 8 + 13 lưu huỳnh + 1 Magie + 0,1B
-    - phân bón OM CAMAU TECH
+Ví dụ câu hỏi cần chỉnh sửa:
 
-**Ghi chú**: Chỉ output ra câu hỏi đã chỉnh sửa hoặc câu hỏi gốc nếu không có vấn đề gì mà không giải thích gì thêm, không trả lời cũng như không tư vấn gì
-- Nếu có bổ sung thêm ý, bắt buộc vẫn giữ nguyên ý nghĩa câu hỏi, không thêm ý khác vào câu hỏi, dựa vào các ví dụ ở dưới
-- Nếu câu hỏi ngắn hơn 6 từ, bắt buộc phải làm dài hơn câu hỏi
+Input: Hứng daanx cho tooii cách bons và lieu luong bón củ phân bon Ca Li Cà Mau ?
+➜ Output: Hướng dẫn cho tôi cách bón và liều lượng bón của phân bón Kali Cà Mau ?
 
-Ví dụ: 
-    - Nếu input là: "Hứng daanx cho tooii cách bons và lieu luong bón củ phân bon Ca Li Cà Mau ?",
-    - bạn sẽ chỉ output: "Hướng dẫn cho tôi cách bón và liều lượng bón của phân bón Kali Cà Mau ?"
+Input: Địa chỉ
+➜ Output: Địa chỉ Công ty Phân bón Cà Mau ở đâu ?
+
+Input: 16 16 8 là gì ?
+➜ Output: Giới thiệu cho tôi phân bón 16 16 8 ?
+* Lưu ý riêng những case giống như này thì sẽ không được thêm công dụng, chỉ đơn giản là giới thiệu là gì
+
+Input: Xin chào
+➜ Output: Xin chào
     
-    - Input: "Địa chỉ"
-    - Output: "Địa chỉ công ty Phân Bón Cà Mau ở đâu ?"
-    
-    - Input: "NPK là gì"
-    - Output: "Giới thiệu cho tôi phân bón NPK ?" 
-    - Không được ra Output: "Giới thiệu cho tôi phân bón NPK và công dụng của chúng trong nông nghiệp ?" vì thừa ý "công dụng của chúng trong nông nghiệp ", trong câu hỏi gốc k đề cập
-    
-    - Input: "16 16 8 là gì ?"
-    - Output: "Giới thiệu cho tôi phân bón 16 16 8 ?"
-    
-    - Input: "Công dụng 16 16 8 là gì ?"
-    - Output: "Cho tôi biết công dụng của phân bón 16 16 8 như thế nào ?"
-    
-    - Input: "Xin chào"
-    - Output: "Xin chào công ty Phân Bón Cà Mau"
-    - Bạn không được output kiểu như "Xin chào, tôi có thể giúp gì cho bạn", bởi vì đây đã là phản hồi, trả lời - điều bạn không được phép
-    
-    """
+**Tuyệt đối**:
+- Tuyệt đối không được tương tác với người dùng.
+- Không trả lời lại, không giải thích, không tư vấn.
+- Chỉ in ra câu hỏi đã chỉnh sửa hoặc nguyên văn câu hỏi nếu không có gì cần sửa.
+- Nếu câu hỏi ngắn hơn 6 words, bắt buộc phải làm dài hơn câu hỏi
+"""
     
     try:
         messages = [{"role": "system", "content": prompt}]
@@ -171,11 +164,11 @@ Ví dụ:
             # Decode base64 string to bytes
             audio_bytes = base64.b64decode(input_audio)
             
-            transcription_text = transcribe_audio(audio_bytes)
+            input_text = transcribe_audio(audio_bytes)
             
             messages.append({
                     "role": "user",
-                    "content": transcription_text
+                    "content": input_text
                 })
             
         else:
@@ -189,14 +182,20 @@ Ví dụ:
         
         #print(messages)
         
-        completion = client.chat.completions.create(
-            model="gpt-4.1",
-            temperature= 0.65,
-            messages = messages
+        # completion = client.chat.completions.create(
+        #     model="gpt-4.1",
+        #     temperature= 1,
+        #     messages = messages
+        # )
+        
+        completion = client.responses.create(
+            model = "gpt-4.1-mini",
+            instructions = prompt,
+            input = input_text,
+            temperature = 0.7
         )
         
-        corrected_text = completion.choices[0].message
-        return corrected_text.content
+        return completion.output_text
     
     except Exception as e:
         print(f"Error: {e}")
