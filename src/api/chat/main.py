@@ -19,7 +19,7 @@ import time
 load_dotenv(".env")
 
 # ChromaDB Configuration
-collection_path = "/app/vector_database_server"
+collection_path = "/app/vector_database"
 collection_name = os.getenv("CHROMADB_COLLECTION_NAME")
 embedding_func = define_embedding_function(api_key=os.getenv("OPENAI_API_KEY"), model_name=os.getenv("EMBEDDING_MODEL"))
 similarity_method = os.getenv("SIMILARITY_METHOD")
