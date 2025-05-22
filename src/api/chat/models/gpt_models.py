@@ -83,12 +83,12 @@ Có một số trường hợp có thể match nhau nhưng không cần giống 
 - AHCM và Anh Hai Cà Mau
 - HCM và Hồ Chí Minh
 - MVTL và Mùa vàng thắng lớn 
-- phân U rê, Ure với Urea Bio
+- Urea đồng nghĩa với Urea Bio
 
 **Lưu ý**:
 - Nếu như không chọn được câu hỏi nào, hãy output ra -1
 
-Đây là bộ câu hỏi của công ty :
+**Đây là bộ câu hỏi của công ty :**
 
 {results_docu}
 
@@ -113,7 +113,7 @@ def correct_text_or_audio(input_text: str, input_audio: str) -> str:
 Bạn là chuyên gia ngôn ngữ của Công ty Phân bón Cà Mau (PVCFC). Bạn cần phát hiện lỗi chính tả, ngữ pháp, và hiệu chỉnh lại câu hỏi đầu vào như sau:
 
 Nếu câu hỏi đã đầy đủ, chỉ sửa lỗi sai chính tả, ngữ pháp.
-Nếu câu hỏi quá ngắn, thiếu ý hoặc chưa rõ nghĩa, hãy viết lại hoặc bổ sung ý để câu hỏi rõ ràng, đầy đủ và có khả năng query ra đáp án chi tiết hơn.
+Nếu câu hỏi quá ngắn, thiếu ý hoặc chưa rõ nghĩa, hãy viết lại cho dài hơn, rõ ràng hơn để có khả năng query ra đáp án chi tiết hơn.
     
 **Lưu ý quan trọng:**
 - Viết chính xác tiếng Việt, có dấu đúng chuẩn.
@@ -123,7 +123,7 @@ Trong câu hỏi đầu vào khả năng cao sẽ là về phân bón, hãy đ�
     - TE
     - K - Kali, P - Photpho, Mg - Magie, B, S - lưu huỳnh, lân, Ca - Canxi
     - N46 Protect / N46 .True / N46 .Golden/ N46 .Plus/ N46 Rich
-    - Ure, Urea Bio
+    - Ure, Urea, Urea Bio ( pay attention, Ure and Urea are different)
     - N.Humate
     - DAP Cà Mau, Kali Cà Mau, Đạm Cà Mau
     - OM CAMAU LIFE / OM CAMAU FARM / OM CAMAU NEED / OM CAMAU HELP / OM CAMAU GREEN / OM CAMAU GOOD / OM CAMAU ECO / OM CAMAU TECH / OM CAMAU RICH / OM CAMAU SUCCESS / OM CAMAU INNOVA / OM CAMAU HAPPY
@@ -135,8 +135,10 @@ Các tên này có thể kết hợp với nhau ( có thể viết liền hoặc
     - phân bón NPK 16 16 8 + 13 lưu huỳnh + 1 Magie + 0,1B
     - phân bón OM CAMAU TECH
 
-**Ghi chú**: Chỉ trả lời câu hỏi đã chỉnh sửa mà không giải thích gì thêm. Luôn luôn trả lời dưới dạng text
-Không thêm từ Phân Bón Cà Mau nếu rewrite
+**Ghi chú**: Chỉ output ra câu hỏi đã chỉnh sửa hoặc câu hỏi gốc nếu không có vấn đề gì mà không giải thích gì thêm, không trả lời cũng như không tư vấn gì
+- Nếu có bổ sung thêm ý, bắt buộc vẫn giữ nguyên ý nghĩa câu hỏi, không thêm ý khác vào câu hỏi, dựa vào các ví dụ ở dưới
+- Nếu câu hỏi ngắn hơn 6 từ, bắt buộc phải làm dài hơn câu hỏi
+
 Ví dụ: 
     - Nếu input là: "Hứng daanx cho tooii cách bons và lieu luong bón củ phân bon Ca Li Cà Mau ?",
     - bạn sẽ chỉ output: "Hướng dẫn cho tôi cách bón và liều lượng bón của phân bón Kali Cà Mau ?"
@@ -146,6 +148,7 @@ Ví dụ:
     
     - Input: "NPK là gì"
     - Output: "Giới thiệu cho tôi phân bón NPK ?" 
+    - Không được ra Output: "Giới thiệu cho tôi phân bón NPK và công dụng của chúng trong nông nghiệp ?" vì thừa ý "công dụng của chúng trong nông nghiệp ", trong câu hỏi gốc k đề cập
     
     - Input: "16 16 8 là gì ?"
     - Output: "Giới thiệu cho tôi phân bón 16 16 8 ?"
@@ -183,8 +186,8 @@ Ví dụ:
         #print(messages)
         
         completion = client.chat.completions.create(
-            model="gpt-4.1-mini",
-            temperature= 0.8,
+            model="gpt-4.1",
+            temperature= 0.7,
             messages = messages
         )
         
