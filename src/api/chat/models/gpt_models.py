@@ -48,7 +48,7 @@ def the_most_similar_doc(question, results):
     
     
     completion = client.responses.parse(
-            model="gpt-4.1-mini",
+            model="gpt-4.1",
             temperature= 0.7,
             input = [ 
                         { "role": "developer", "content": f"""
