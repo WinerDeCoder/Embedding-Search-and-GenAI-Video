@@ -156,8 +156,6 @@ Input: Xin chào
 """
     
     try:
-        messages = [{"role": "system", "content": prompt}]
-        
         # Case audio
         if input_text == "":
             
@@ -165,28 +163,7 @@ Input: Xin chào
             audio_bytes = base64.b64decode(input_audio)
             
             input_text = transcribe_audio(audio_bytes)
-            
-            messages.append({
-                    "role": "user",
-                    "content": input_text
-                })
-            
-        else:
-            
-            messages.append({
-                    "role": "user",
-                    "content": input_text
-                })
-            
-            #raise ValueError("Either text or audio input must be provided.")
-        
-        #print(messages)
-        
-        # completion = client.chat.completions.create(
-        #     model="gpt-4.1",
-        #     temperature= 1,
-        #     messages = messages
-        # )
+               
         
         completion = client.responses.create(
             model = "gpt-4.1-mini",
@@ -199,7 +176,7 @@ Input: Xin chào
     
     except Exception as e:
         print(f"Error: {e}")
-        return input_text if input_text else "Lỗi xử lý âm thanh."
+        return input_text
 
 
 
