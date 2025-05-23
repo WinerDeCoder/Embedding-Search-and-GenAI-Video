@@ -48,8 +48,8 @@ def the_most_similar_doc(question, results):
     
     
     completion = client.responses.parse(
-            model="gpt-4.1-mini",
-            temperature= 0.7,
+            model="gpt-4.1",
+            temperature= 0.4,
             input = [ 
                         { "role": "developer", "content": f"""
 **Vai trò, nhiệm vụ**:
@@ -73,7 +73,7 @@ Bộ câu hỏi của công ty:
 }}
 ]
 
-Thì lúc này bạn sẽ output ra "1", vì document 1 match với câu hỏi gốc về ngữ nghĩa hỏi về cách dùng phân bón 18 8 18, 
+Thì lúc này bạn sẽ output ra "1", vì document 1 match với câu hỏi gốc về ngữ nghĩa hỏi và cách dùng phân bón 18 8 18, 
 
 **Trường hợp đặc biệt*:
 Có một số trường hợp có thể match nhau nhưng không cần giống hoàn toàn như sau thì vẫn cho match vì đây là 1 số trường hợp viết tắt:
@@ -192,7 +192,71 @@ Input: Xin chào
             model = "gpt-4.1-mini",
             instructions = prompt,
             input = input_text,
-            temperature = 0.7
+            temperature = 0.6
+        )
+        
+        return completion.output_text
+    
+    except Exception as e:
+        print(f"Error: {e}")
+        return input_text if input_text else "Lỗi xử lý âm thanh."
+
+
+
+def picking_up_model(input_text: str, input_audio: str) -> str:
+    """
+    Corrects or enhances the input text from a user, handling both text and audio input.
+    Uses OpenAI's GPT-4o mini Audio model to process and correct the input.
+    
+    :param input_text: Optional string input (user-typed text)
+    :param input_audio: Optional audio input (bytes format, user-recorded speech)
+    :return: Corrected text
+    """
+    prompt = \
+    f"""**Nhiệm vụ:**
+Bạn là chuyên gia ngôn ngữ của Công ty Phân bón Cà Mau (PVCFC).
+Nhiệm vụ của bạn là xác định xem 
+
+"""
+    
+    try:
+        messages = [{"role": "system", "content": prompt}]
+        
+        # Case audio
+        if input_text == "":
+            
+            # Decode base64 string to bytes
+            audio_bytes = base64.b64decode(input_audio)
+            
+            input_text = transcribe_audio(audio_bytes)
+            
+            messages.append({
+                    "role": "user",
+                    "content": input_text
+                })
+            
+        else:
+            
+            messages.append({
+                    "role": "user",
+                    "content": input_text
+                })
+            
+            #raise ValueError("Either text or audio input must be provided.")
+        
+        #print(messages)
+        
+        # completion = client.chat.completions.create(
+        #     model="gpt-4.1",
+        #     temperature= 1,
+        #     messages = messages
+        # )
+        
+        completion = client.responses.create(
+            model = "gpt-4.1-mini",
+            instructions = prompt,
+            input = input_text,
+            temperature = 0.6
         )
         
         return completion.output_text
