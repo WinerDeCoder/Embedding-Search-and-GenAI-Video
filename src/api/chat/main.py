@@ -2,16 +2,11 @@ import os
 import asyncio
 import uuid
 from concurrent.futures import ThreadPoolExecutor
-
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-
 from pydantic import BaseModel
-from typing import List
-
 from dotenv import load_dotenv
-
 from models.chromadb_functions import * 
 from models.gpt_models import correct_text_or_audio, the_most_similar_doc
 import time
@@ -24,8 +19,6 @@ collection_name = os.getenv("CHROMADB_COLLECTION_NAME")
 embedding_func = define_embedding_function(api_key=os.getenv("OPENAI_API_KEY"), model_name=os.getenv("EMBEDDING_MODEL"))
 similarity_method = os.getenv("SIMILARITY_METHOD")
 chromadb_collection = get_chroma_collection(collection_path, collection_name, embedding_func, similarity_method)
-
-ask_again = "U là trời, câu hỏi này coi vậy mà khó ha, thôi từ từ anh hai cà mau trả lời sau nha, hỏi câu khác giúp mình nha."
 
 # Initialize FastAPI
 app = FastAPI()
