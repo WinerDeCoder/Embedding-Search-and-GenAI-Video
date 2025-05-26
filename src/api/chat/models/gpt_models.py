@@ -89,6 +89,7 @@ Có một số trường hợp có thể match nhau nhưng không cần giống 
 - Để ý các từ khoá tên riêng
 - Sẽ có trường hợp câu hỏi người dùng không khớp với bất kì câu hỏi nào trong bộ câu hỏi, nếu không khớp thì output ra -1
 - Nếu người dùng hỏi đại khải kiểu "Là gì ?" ở lĩnh vực phân bón thì nên match với câu "giới thiệu" chứ không phải "công dụng"
+- Nếu người dùng chỉ hỏi "Địa chỉ ?" mà không cụ thể gì thêm, thì hiểu là đang hỏi địa chỉ "trụ sở chính" của công ty
 - Một chút Ưu tiên những câu hỏi có score thấp hơn nếu phải lựa chọn giữa 2 câu
 **Đây là bộ câu hỏi của công ty :**
 
@@ -117,7 +118,7 @@ Nhiệm vụ của bạn là hiệu chỉnh câu hỏi đầu vào theo yêu c�
 
 Yêu cầu chỉnh sửa:
 - Nếu câu hỏi đã rõ ràng, chỉ sửa lỗi chính tả và ngữ pháp.
-- Nếu câu hỏi quá ngắn, thiếu ý, hoặc không rõ nghĩa, hãy viết lại cho dài hơn, rõ ràng hơn, giữ nguyên ý gốc để có thể truy vấn được câu trả lời chi tiết hơn.
+- Nếu câu hỏi quá ngắn, thiếu ý, hoặc không rõ nghĩa, hãy viết lại cho dài hơn, rõ ràng hơn, lịch sự hơn mà vẫn giữ nguyên ý gốc để có thể dễ truy vấn được câu trả lời hơn.
 
 **Ghi chú**: Chỉ output ra câu hỏi đã chỉnh sửa hoặc câu hỏi gốc nếu không có vấn đề gì mà không giải thích gì thêm, không trả lời cũng như không tư vấn gì
 - Nếu có bổ sung thêm ý, bắt buộc vẫn giữ nguyên ý nghĩa câu hỏi, không thêm ý khác vào câu hỏi, dựa vào các ví dụ ở dưới
@@ -143,7 +144,7 @@ Input: Địa chỉ
 
 Input: 16 16 8 là gì ?
 ➜ Output: Giới thiệu cho tôi phân bón 16 16 8 ?
-* Lưu ý riêng những case giống như này thì sẽ không được thêm công dụng, chỉ đơn giản là giới thiệu là gì
+* Lưu ý riêng những case giống như trên khi hỏi kiểu "Là gì?" thì chỉ đơn giản thêm "giới thiệu" là gì, không được thêm ý "công dụng" vào
 
 Input: Xin chào
 ➜ Output: Xin chào
@@ -152,7 +153,8 @@ Input: Xin chào
 - Tuyệt đối không được tương tác với người dùng.
 - Không trả lời lại, không giải thích, không tư vấn.
 - Chỉ in ra câu hỏi đã chỉnh sửa hoặc nguyên văn câu hỏi nếu không có gì cần sửa.
-- Nếu câu hỏi ngắn hơn 6 words, bắt buộc phải làm dài hơn câu hỏi
+- Nếu câu hỏi ngắn hơn 5 words, bắt buộc phải làm dài hơn câu hỏi
+- Hạn chế thêm những từ khoá, những từ quá specific vào câu hỏi, dễ gây nhiễu 
 """
     
     try:
@@ -169,7 +171,7 @@ Input: Xin chào
             model = "gpt-4.1-mini",
             instructions = prompt,
             input = input_text,
-            temperature = 0.6
+            temperature = 0.5
         )
         
         return completion.output_text
