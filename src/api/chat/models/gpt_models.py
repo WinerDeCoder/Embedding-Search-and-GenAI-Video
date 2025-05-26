@@ -83,12 +83,12 @@ Có một số trường hợp có thể match nhau nhưng không cần giống 
 - AHCM và Anh Hai Cà Mau
 - HCM và Hồ Chí Minh
 - MVTL và Mùa vàng thắng lớn 
-- Urea đồng nghĩa với Urea Bio
+- Urea với Urea Bio
 
 **Lưu ý**:
 - Để ý các từ khoá tên riêng
 - Sẽ có trường hợp câu hỏi người dùng không khớp với bất kì câu hỏi nào trong bộ câu hỏi, nếu không khớp thì output ra -1
-- Nếu người dùng hỏi đại khải kiểu "Là gì ?" ở lĩnh vực phân bón thì nên match với câu "giới thiệu" chứ không phải "công dụng"
+- Nếu người dùng hỏi đại khải kiểu "Là gì ?" ở lĩnh vực phân bón thì bắt buộc match với câu có ý nghĩa "giới thiệu" chứ không phải "công dụng" của phân bón đó
 - Nếu người dùng chỉ hỏi "Địa chỉ ?" mà không cụ thể gì thêm, thì hiểu là đang hỏi địa chỉ "trụ sở chính" của công ty
 - Một chút Ưu tiên những câu hỏi có score thấp hơn nếu phải lựa chọn giữa 2 câu
 **Đây là bộ câu hỏi của công ty :**
