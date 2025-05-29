@@ -178,7 +178,7 @@ Input: Xin chào
     
     except Exception as e:
         print(f"Error: {e}")
-        return input_text, ""
+        return input_text, "error"
 
 
 
