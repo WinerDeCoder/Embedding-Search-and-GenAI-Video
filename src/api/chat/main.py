@@ -76,7 +76,7 @@ async def video_search(query: SearchQuery):
 
         # Step 1: Correct text
         correct_start = time.perf_counter()
-        corrected_text = await asyncio.to_thread(correct_text_or_audio, query.text, query.audio)
+        input_text, corrected_text = await asyncio.to_thread(correct_text_or_audio, query.text, query.audio)
         correct_end = time.perf_counter()
 
         # Step 2: Query ChromaDB
@@ -114,7 +114,8 @@ async def video_search(query: SearchQuery):
         # Prepare response
         response = {
             "status": "success",
-            "input_text": corrected_text,
+            "input_text": input_text,
+            "rewrited_text": corrected_text,
             "exist": -1 if top_index == -1 else 1,
             "data": paired_data,
             "timing": {

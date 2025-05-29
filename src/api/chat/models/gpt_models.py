@@ -102,7 +102,7 @@ Có một số trường hợp có thể match nhau nhưng không cần giống 
             
     return completion.output_parsed.index
 
-def correct_text_or_audio(input_text: str, input_audio: str) -> str:
+def correct_text_or_audio(input_text: str, input_audio: str):
     """
     Corrects or enhances the input text from a user, handling both text and audio input.
     Uses OpenAI's GPT-4o mini Audio model to process and correct the input.
@@ -174,7 +174,7 @@ Input: Xin chào
             temperature = 0.5
         )
         
-        return completion.output_text
+        return input_text, completion.output_text
     
     except Exception as e:
         print(f"Error: {e}")
