@@ -155,6 +155,8 @@ Input: Xin chào
 - Chỉ in ra câu hỏi đã chỉnh sửa hoặc nguyên văn câu hỏi nếu không có gì cần sửa.
 - Nếu câu hỏi ngắn hơn 5 words, bắt buộc phải làm dài hơn câu hỏi
 - Hạn chế thêm những từ khoá, những từ quá specific vào câu hỏi, dễ gây nhiễu 
+
+** Just modify the input question and output the modified question if needed, Do not answer, explain, or ask anything else. **
 """
     
     try:
