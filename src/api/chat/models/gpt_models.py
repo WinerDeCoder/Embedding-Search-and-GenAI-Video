@@ -50,6 +50,7 @@ def the_most_similar_doc(question, results):
     completion = client.responses.parse(
             model="gpt-4.1",
             temperature= 0.4,
+            max_completion_tokens = 3000,
             input = [ 
                         { "role": "developer", "content": f"""
 **Vai trò, nhiệm vụ**:
@@ -173,7 +174,8 @@ Input: Xin chào
             model = "gpt-4.1-mini",
             instructions = prompt,
             input = input_text,
-            temperature = 0.5
+            temperature = 0.5,
+            max_completion_tokens= 2000
         )
         
         return input_text, completion.output_text
